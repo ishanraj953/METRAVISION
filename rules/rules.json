@@ -42,5 +42,16 @@
     "version": "1.0",
     "status": "ACTIVE",
     "source": "Legal Metrology (Packaged Commodities) Rules"
-  }
+  },
+  {
+  "rule_id": "LM-PC-005",
+  "field": "manufacturing_packing_date",
+  "category": ["GENERAL"],
+  "requirement": "Manufacturing/Packing date required",
+  "severity": "HIGH",
+  "effective_from": "2022-04-01",
+  "version": "1.0",
+  "status": "ACTIVE",
+  "source": "Legal Metrology (Packaged Commodities) Rules"
+ }
 ]
