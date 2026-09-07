@@ -1,0 +1,22 @@
+[
+  {
+    "field": "mrp",
+    "validation": "required"
+  },
+  {
+    "field": "net_quantity",
+    "validation": "required"
+  },
+  {
+    "field": "net_quantity",
+    "validation": "numeric"
+  },
+  {
+    "field": "consumer_care",
+    "validation": "phone_or_email"
+  },
+  {
+    "field": "date",
+    "validation": "valid_date"
+  }
+]

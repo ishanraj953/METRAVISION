@@ -1,0 +1,10 @@
+{
+  "manufacturer": true,
+  "packer": true,
+  "importer": true,
+  "net_quantity": true,
+  "mrp": true,
+  "consumer_care": true,
+  "country_of_origin": true,
+  "unit_sale_price": true
+}

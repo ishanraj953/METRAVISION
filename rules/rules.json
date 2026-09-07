@@ -1,0 +1,46 @@
+[
+  {
+    "rule_id": "LM-PC-001",
+    "field": "mrp",
+    "category": ["GENERAL"],
+    "requirement": "MRP declaration required",
+    "severity": "HIGH",
+    "effective_from": "2022-04-01",
+    "version": "1.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules"
+  },
+  {
+    "rule_id": "LM-PC-002",
+    "field": "manufacturer_name",
+    "category": ["GENERAL"],
+    "requirement": "Manufacturer name required",
+    "severity": "HIGH",
+    "effective_from": "2022-04-01",
+    "version": "1.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules"
+  },
+  {
+    "rule_id": "LM-PC-003",
+    "field": "net_quantity",
+    "category": ["GENERAL"],
+    "requirement": "Net quantity declaration required",
+    "severity": "HIGH",
+    "effective_from": "2022-04-01",
+    "version": "1.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules"
+  },
+  {
+    "rule_id": "LM-PC-004",
+    "field": "consumer_care",
+    "category": ["GENERAL"],
+    "requirement": "Consumer care details required",
+    "severity": "MEDIUM",
+    "effective_from": "2022-04-01",
+    "version": "1.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules"
+  }
+]
