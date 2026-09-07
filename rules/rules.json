@@ -7,7 +7,8 @@
     "severity": "HIGH",
     "effective_from": "2022-04-01",
     "version": "1.0",
-    "status": "ACTIVE"
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules"
   },
   {
     "rule_id": "LM-PC-002",
@@ -17,7 +18,8 @@
     "severity": "HIGH",
     "effective_from": "2022-04-01",
     "version": "1.0",
-    "status": "ACTIVE"
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules"
   },
   {
     "rule_id": "LM-PC-003",
@@ -27,7 +29,8 @@
     "severity": "HIGH",
     "effective_from": "2022-04-01",
     "version": "1.0",
-    "status": "ACTIVE"
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules"
   },
   {
     "rule_id": "LM-PC-004",
@@ -37,6 +40,7 @@
     "severity": "MEDIUM",
     "effective_from": "2022-04-01",
     "version": "1.0",
-    "status": "ACTIVE"
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules"
   }
 ]
