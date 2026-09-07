@@ -1,54 +1,50 @@
 def calculate_risk_score(issues):
     """
-    Calculate risk score based on compliance issues.
-
-    issues should be a list of dictionaries.
-    Each issue can contain:
-    - severity: high, medium, or low
+    Calculate risk score using the severity scores
+    defined by the METRAVISION rule engine.
     """
+
+    severity_scores = {
+        "HIGH": 10,
+        "MEDIUM": 5,
+        "LOW": 2
+    }
 
     score = 0
 
     for issue in issues:
-        severity = issue.get("severity", "low").lower()
+        severity = issue.get("severity", "LOW").upper()
+        score += severity_scores.get(severity, 0)
 
-        if severity == "high":
-            score += 30
-
-        elif severity == "medium":
-            score += 20
-
-        elif severity == "low":
-            score += 10
-
-    # Maximum score is 100
-    if score > 100:
-        score = 100
+    # Convert score to a 0-100 scale
+    if score >= 20:
+        risk_score = 100
+    else:
+        risk_score = score * 5
 
     # Decide risk level
-    if score >= 70:
+    if risk_score >= 70:
         risk_level = "HIGH"
 
-    elif score >= 40:
+    elif risk_score >= 40:
         risk_level = "MEDIUM"
 
     else:
         risk_level = "LOW"
 
     return {
-        "risk_score": score,
+        "risk_score": risk_score,
         "risk_level": risk_level,
         "issues_count": len(issues)
     }
 
 
-# Test data
 if __name__ == "__main__":
 
     issues = [
-        {"severity": "high"},
-        {"severity": "medium"},
-        {"severity": "low"}
+        {"severity": "HIGH"},
+        {"severity": "MEDIUM"},
+        {"severity": "LOW"}
     ]
 
     result = calculate_risk_score(issues)
