@@ -1,4 +1,3 @@
-
 def generate_explanation(issues):
     """
     Explain why each detected issue is important.
@@ -8,26 +7,41 @@ def generate_explanation(issues):
 
     for issue in issues:
 
-        field = issue.get("field", "unknown")
-        severity = issue.get("severity", "LOW").upper()
+        violation_type = issue.get(
+            "type",
+            "unknown"
+        )
 
-        if field == "mrp":
-            explanation = "MRP declaration is missing or invalid."
+        severity = issue.get(
+            "severity",
+            "UNKNOWN"
+        ).upper()
 
-        elif field == "net_quantity":
-            explanation = "Net quantity declaration is missing or invalid."
+        if violation_type == "missing_declaration":
+            explanation = "Required product declaration is missing."
 
-        elif field == "consumer_care":
-            explanation = "Consumer care contact details are missing or invalid."
+        elif violation_type == "mrp_violation":
+            explanation = "MRP declaration is missing or incorrect."
 
-        elif field == "manufacturer_name":
-            explanation = "Manufacturer name declaration is missing or invalid."
+        elif violation_type == "font_readability":
+            explanation = "Required information is difficult to read."
+
+        elif violation_type == "online_mismatch":
+            explanation = "Online product information does not match the package."
+
+        elif violation_type == "poor_image":
+            explanation = "Poor image quality may affect reliable verification."
+
+        elif violation_type == "repeat_violation":
+            explanation = "The manufacturer has a history of repeated violations."
 
         else:
-            explanation = f"{field} declaration has a compliance issue."
+            explanation = (
+                f"{violation_type} has a compliance issue."
+            )
 
         explanations.append({
-            "field": field,
+            "type": violation_type,
             "severity": severity,
             "explanation": explanation
         })
@@ -35,43 +49,58 @@ def generate_explanation(issues):
     return explanations
 
 
-def generate_recommendation(risk_level, priority, issues):
+def generate_recommendation(
+    risk_level,
+    priority,
+    issues
+):
     """
     Generate an action recommendation.
     """
 
     if len(issues) == 0:
-        return "No compliance issues detected. No immediate action required."
+        return (
+            "No compliance issues detected. "
+            "No immediate action required."
+        )
 
-    fields = []
+    issue_types = []
 
     for issue in issues:
-        field = issue.get("field", "unknown")
-        fields.append(field)
 
-    fields = list(dict.fromkeys(fields))
-    issue_text = ", ".join(fields)
+        violation_type = issue.get(
+            "type",
+            "unknown"
+        )
 
-    if risk_level == "HIGH" and priority == "URGENT":
+        issue_types.append(violation_type)
+
+    issue_types = list(dict.fromkeys(issue_types))
+
+    issue_text = ", ".join(issue_types)
+
+    if risk_level == "CRITICAL":
         return (
             f"Immediate inspection required. "
-            f"Critical compliance issues detected in: {issue_text}."
+            f"Critical compliance issues detected: {issue_text}."
         )
 
     elif risk_level == "HIGH":
         return (
             f"Schedule product inspection. "
-            f"High-risk issues detected in: {issue_text}."
+            f"High-risk issues detected: {issue_text}."
         )
 
     elif risk_level == "MEDIUM":
         return (
-            f"Review and verify the following declarations: {issue_text}."
+            f"Review and verify the following issues: "
+            f"{issue_text}."
         )
 
     else:
         return (
-            f"Correct the detected compliance issues: {issue_text}."
+            f"Correct the detected compliance issues: "
+            f"{issue_text}."
         )
 
 
@@ -79,27 +108,33 @@ if __name__ == "__main__":
 
     issues = [
         {
-            "field": "mrp",
-            "severity": "HIGH"
+            "type": "missing_declaration",
+            "confidence": 0.95
         },
         {
-            "field": "consumer_care",
-            "severity": "MEDIUM"
+            "type": "mrp_violation",
+            "confidence": 0.90
+        },
+        {
+            "type": "poor_image",
+            "confidence": 0.80
         }
     ]
 
     explanations = generate_explanation(issues)
 
-    print("WHY IS THIS RISKY?")
+    print("\nWHY IS THIS RISKY?")
+    print("------------------")
 
     for item in explanations:
         print("-", item["explanation"])
 
     recommendation = generate_recommendation(
-        "HIGH",
+        "CRITICAL",
         "URGENT",
         issues
     )
 
-    print("\nRECOMMENDATION:")
+    print("\nRECOMMENDATION")
+    print("--------------")
     print(recommendation)
