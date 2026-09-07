@@ -1,22 +1,21 @@
-def calculate_risk_score(issues):
-    """
-    Calculate risk score using the severity scores
-    defined by the METRAVISION rule engine.
-    """
+import json
 
-    severity_scores = {
-        "HIGH": 10,
-        "MEDIUM": 5,
-        "LOW": 2
-    }
+
+def calculate_risk_score(issues):
+
+    # Load severity scores from Rule Engine
+    with open("rules/severity.json", "r") as file:
+        severity_data = json.load(file)
 
     score = 0
 
     for issue in issues:
-        severity = issue.get("severity", "LOW").upper()
-        score += severity_scores.get(severity, 0)
 
-    # Convert score to a 0-100 scale
+        severity = issue.get("severity", "LOW").upper()
+
+        score += severity_data.get(severity, {}).get("score", 0)
+
+    # Convert score to 0-100 scale
     if score >= 20:
         risk_score = 100
     else:
