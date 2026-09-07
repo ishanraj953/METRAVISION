@@ -1,6 +1,7 @@
-def generate_recommendation(risk_level, priority):
+def generate_recommendation(risk_level, priority, issues):
     """
-    Generate an action recommendation for the officer.
+    Generate an action recommendation based on
+    risk level, priority and detected issues.
     """
 
     if risk_level == "HIGH" and priority == "URGENT":
@@ -10,21 +11,25 @@ def generate_recommendation(risk_level, priority):
         return "Schedule product inspection"
 
     elif risk_level == "MEDIUM":
-        return "Review the product and verify declarations"
+        return "Review violations and verify declarations"
+
+    elif len(issues) > 0:
+        return "Correct the detected compliance issues"
 
     else:
         return "No immediate action required"
 
 
-# Test
 if __name__ == "__main__":
 
-    risk_level = "HIGH"
-    priority = "URGENT"
+    issues = [
+        {"severity": "HIGH"}
+    ]
 
     recommendation = generate_recommendation(
-        risk_level,
-        priority
+        "HIGH",
+        "URGENT",
+        issues
     )
 
     print("Recommendation:", recommendation)
