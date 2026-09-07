@@ -1,0 +1,17 @@
+{
+    "valid": true,
+    "width": 1300,
+    "height": 790,
+    "format": "jpg",
+    "file_size_mb": 0.25,
+    "message": "Image successfully preprocessed",
+    "processing": {
+        "orientation_correction": true,
+        "resizing": true,
+        "grayscale": true,
+        "noise_reduction": true,
+        "clahe": true,
+        "perspective_correction": true
+    },
+    "output_path": "Phase1/output\\processed_image.jpg"
+}
