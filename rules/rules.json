@@ -64,5 +64,49 @@
   "version": "1.0",
   "status": "ACTIVE",
   "source": "Legal Metrology (Packaged Commodities) Rules"
- }
+ },
+ {
+  "rule_id": "LM-PC-007",
+  "field": "importer_name",
+  "category": ["IMPORTED"],
+  "requirement": "Importer name declaration required",
+  "severity": "HIGH",
+  "effective_from": "2022-04-01",
+  "version": "1.0",
+  "status": "ACTIVE",
+  "source": "Legal Metrology (Packaged Commodities) Rules"
+},
+{
+  "rule_id": "LM-PC-008",
+  "field": "importer_address",
+  "category": ["IMPORTED"],
+  "requirement": "Importer address declaration required",
+  "severity": "HIGH",
+  "effective_from": "2022-04-01",
+  "version": "1.0",
+  "status": "ACTIVE",
+  "source": "Legal Metrology (Packaged Commodities) Rules"
+},
+{
+  "rule_id": "LM-PC-009",
+  "field": "unit_sale_price",
+  "category": ["E_COMMERCE"],
+  "requirement": "Unit sale price declaration required",
+  "severity": "MEDIUM",
+  "effective_from": "2022-04-01",
+  "version": "1.0",
+  "status": "ACTIVE",
+  "source": "Legal Metrology (Packaged Commodities) Rules"
+},
+{
+  "rule_id": "LM-PC-010",
+  "field": "batch_number",
+  "category": ["GENERAL"],
+  "requirement": "Batch/Lot number declaration required",
+  "severity": "MEDIUM",
+  "effective_from": "2022-04-01",
+  "version": "1.0",
+  "status": "ACTIVE",
+  "source": "Legal Metrology (Packaged Commodities) Rules"
+}
 ]
