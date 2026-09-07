@@ -1,6 +1,6 @@
 from risk_engine import calculate_risk_score
 from priority_engine import decide_priority
-from recommendation_engine import generate_recommendation
+from recommendation_engine import generate_recommendation, generate_explanation
 
 
 def analyze_product(issues):
@@ -20,12 +20,14 @@ def analyze_product(issues):
         priority,
         issues
     )
+    explanations = generate_explanation(issues)
 
     return {
         "risk_score": risk_score,
         "risk_level": risk_level,
         "priority": priority,
         "issues_count": len(issues),
+        "explanations": explanations,
         "recommendation": recommendation
     }
 
@@ -55,4 +57,11 @@ if __name__ == "__main__":
     print("Risk Level:", result["risk_level"])
     print("Priority:", result["priority"])
     print("Issues Found:", result["issues_count"])
-    print("Recommendation:", result["recommendation"])
+    print("\nWHY IS THIS RISKY?")
+
+    for item in result["explanations"]:
+        print("-", item["explanation"])
+
+    print("\nRECOMMENDATION:")
+    print(result["recommendation"])
+
