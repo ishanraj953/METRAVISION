@@ -1,0 +1,12 @@
+[
+  {
+    "rule_id": "LM-PC-001",
+    "field": "mrp",
+    "category": ["GENERAL"],
+    "requirement": "MRP declaration required",
+    "severity": "HIGH",
+    "effective_from": "2022-04-01",
+    "version": "1.0",
+    "status": "ACTIVE"
+  }
+]

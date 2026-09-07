@@ -1,0 +1,11 @@
+{
+  "HIGH": {
+    "score": 10
+  },
+  "MEDIUM": {
+    "score": 5
+  },
+  "LOW": {
+    "score": 2
+  }
+}
