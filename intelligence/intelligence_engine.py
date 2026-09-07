@@ -4,48 +4,52 @@ from recommendation_engine import generate_recommendation
 
 
 def analyze_product(issues):
-    """
-    Analyze product compliance issues and generate
-    risk, priority and recommendation.
-    """
 
-    # Step 1: Calculate risk
+    # Calculate risk
     risk_result = calculate_risk_score(issues)
 
     risk_score = risk_result["risk_score"]
     risk_level = risk_result["risk_level"]
 
-    # Step 2: Decide priority
+    # Decide priority
     priority = decide_priority(risk_score)
 
-    # Step 3: Generate recommendation
+    # Generate recommendation
     recommendation = generate_recommendation(
         risk_level,
-        priority
+        priority,
+        issues
     )
 
-    # Final intelligence result
     return {
         "risk_score": risk_score,
         "risk_level": risk_level,
         "priority": priority,
-        "issues_count": risk_result["issues_count"],
+        "issues_count": len(issues),
         "recommendation": recommendation
     }
 
 
-# Test
 if __name__ == "__main__":
 
     issues = [
-        {"severity": "high"},
-        {"severity": "medium"},
-        {"severity": "low"}
+        {
+            "field": "mrp",
+            "severity": "HIGH"
+        },
+        {
+            "field": "consumer_care",
+            "severity": "MEDIUM"
+        },
+        {
+            "field": "net_quantity",
+            "severity": "LOW"
+        }
     ]
 
     result = analyze_product(issues)
 
-    print("METRAVISION INTELLIGENCE RESULT")
+    print("\nMETRAVISION INTELLIGENCE RESULT")
     print("--------------------------------")
     print("Risk Score:", result["risk_score"])
     print("Risk Level:", result["risk_level"])
