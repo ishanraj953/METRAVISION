@@ -1,11 +1,26 @@
 {
-  "HIGH": {
-    "score": 10
+  "missing_declaration": {
+    "score": 25,
+    "description": "Required declaration is missing"
   },
-  "MEDIUM": {
-    "score": 5
+  "mrp_violation": {
+    "score": 20,
+    "description": "MRP declaration is missing or incorrect"
   },
-  "LOW": {
-    "score": 2
+  "font_readability": {
+    "score": 15,
+    "description": "Declaration is difficult to read"
+  },
+  "online_mismatch": {
+    "score": 15,
+    "description": "Online product information does not match the package"
+  },
+  "poor_image": {
+    "score": 5,
+    "description": "Image quality is poor and may affect verification"
+  },
+  "repeat_violation": {
+    "score": 20,
+    "description": "Manufacturer has repeated compliance violations"
   }
 }
