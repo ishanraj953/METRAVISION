@@ -4,6 +4,12 @@ from recommendation_engine import (
     generate_recommendation,
     generate_explanation
 )
+from evidence_engine import create_evidence_chain
+from evidence_engine import validate_evidence
+from decision_engine import make_decision
+from officer_recommendation import (
+    generate_officer_recommendation
+)
 
 
 def analyze_product(
@@ -42,74 +48,198 @@ def analyze_product(
     )
 
     priority_score = priority_result["priority_score"]
-    inspection_priority = priority_result["inspection_priority"]
+    inspection_priority = priority_result[
+        "inspection_priority"
+    ]
 
     # -----------------------------
-    # 3. Generate Explanation
+    # 3. Create Evidence Chain
     # -----------------------------
 
-    explanations = generate_explanation(issues)
+    evidence_chain = create_evidence_chain(issues)
 
     # -----------------------------
-    # 4. Generate Recommendation
+    # 4. Validate Evidence
     # -----------------------------
 
-    recommendation = generate_recommendation(
-        risk_level,
-        "URGENT" if inspection_priority == 1 else "HIGH",
+    validated_evidence = []
+
+    for evidence in evidence_chain:
+
+        validation = validate_evidence(
+            evidence
+        )
+
+        evidence["valid"] = validation["valid"]
+        evidence["validation_errors"] = (
+            validation["errors"]
+        )
+
+        validated_evidence.append(evidence)
+
+    # -----------------------------
+    # 5. Overall Evidence Confidence
+    # -----------------------------
+
+    if len(validated_evidence) > 0:
+
+        total_confidence = 0
+
+        for evidence in validated_evidence:
+            total_confidence += evidence[
+                "evidence_confidence"
+            ]
+
+        overall_confidence = round(
+            total_confidence
+            / len(validated_evidence),
+            2
+        )
+
+    else:
+        overall_confidence = 0.0
+
+    # -----------------------------
+    # 6. Check Overall Evidence
+    # -----------------------------
+
+    evidence_valid = all(
+        evidence["valid"]
+        for evidence in validated_evidence
+    )
+
+    # -----------------------------
+    # 7. Decision Engine
+    # -----------------------------
+
+    decision_result = make_decision(
+        risk_level=risk_level,
+        evidence_confidence=overall_confidence,
+        evidence_valid=evidence_valid,
+        inspection_priority=inspection_priority
+    )
+
+    officer_decision = decision_result[
+        "officer_decision"
+    ]
+
+    decision_reason = decision_result[
+        "decision_reason"
+    ]
+
+    # -----------------------------
+    # 8. Officer Recommendation
+    # -----------------------------
+
+    officer_result = generate_officer_recommendation(
+        officer_decision=officer_decision,
+        risk_level=risk_level,
+        inspection_priority=inspection_priority
+    )
+
+    # -----------------------------
+    # 9. Explanations
+    # -----------------------------
+
+    explanations = generate_explanation(
         issues
     )
 
     # -----------------------------
-    # 5. Final Intelligence Result
+    # 10. General Recommendation
+    # -----------------------------
+
+    recommendation = generate_recommendation(
+        risk_level,
+        "URGENT"
+        if inspection_priority == 1
+        else "HIGH",
+        issues
+    )
+
+    # -----------------------------
+    # 11. Final Intelligence Output
     # -----------------------------
 
     return {
-        "risk_score": risk_score,
-        "risk_level": risk_level,
-        "priority_score": priority_score,
-        "inspection_priority": inspection_priority,
-        "issues_count": len(issues),
+        "risk": {
+            "risk_score": risk_score,
+            "risk_level": risk_level,
+            "severity_score": risk_result[
+                "severity_score"
+            ],
+            "confidence_score": risk_result[
+                "confidence_score"
+            ],
+            "history_score": risk_result[
+                "history_score"
+            ],
+            "repeat_score": risk_result[
+                "repeat_score"
+            ]
+        },
 
-        "severity_score": risk_result["severity_score"],
-        "confidence_score": risk_result["confidence_score"],
-        "history_score": risk_result["history_score"],
-        "repeat_score": risk_result["repeat_score"],
+        "evidence": {
+            "overall_confidence": overall_confidence,
+            "evidence_valid": evidence_valid,
+            "records": validated_evidence
+        },
 
-        "violation_history": violation_history,
-        "manufacturer_history": manufacturer_history,
-        "repeat_violation": repeat_violation,
-        "violation_frequency": violation_frequency,
+        "history": {
+            "violation_history": violation_history,
+            "manufacturer_history": manufacturer_history,
+            "repeat_violation": repeat_violation,
+            "violation_frequency": violation_frequency
+        },
+
+        "inspection": {
+            "priority_score": priority_score,
+            "inspection_priority": inspection_priority
+        },
+
+        "decision": {
+            "officer_decision": officer_decision,
+            "decision_reason": decision_reason
+        },
 
         "explanations": explanations,
-        "recommendation": recommendation
+
+        "recommendation": recommendation,
+
+        "officer_recommendation": officer_result[
+            "officer_recommendation"
+        ]
     }
 
 
+# Test
 if __name__ == "__main__":
-
-    # -----------------------------
-    # Test Product
-    # -----------------------------
 
     issues = [
         {
-            "type": "missing_declaration",
-            "confidence": 0.95
-        },
-        {
             "type": "mrp_violation",
-            "confidence": 0.90
+            "detected_text": "MRP ₹999",
+            "bounding_box": [120, 250, 180, 50],
+            "rule_id": "LM-PC-001",
+            "reason": "MRP declaration is required.",
+
+            "confidence": 0.94,
+            "image_quality": 0.90,
+            "rule_certainty": 1.00
         },
+
         {
-            "type": "poor_image",
-            "confidence": 0.80
+            "type": "missing_declaration",
+            "detected_text": "",
+            "bounding_box": [300, 400, 200, 60],
+            "rule_id": "LM-PC-002",
+            "reason": "Manufacturer name is required.",
+
+            "confidence": 0.70,
+            "image_quality": 0.60,
+            "rule_certainty": 1.00
         }
     ]
-
-    # -----------------------------
-    # Run Complete Analysis
-    # -----------------------------
 
     result = analyze_product(
         issues,
@@ -119,41 +249,78 @@ if __name__ == "__main__":
         violation_frequency=2
     )
 
-    # -----------------------------
-    # Display Result
-    # -----------------------------
-
-    print("\nMETRAVISION INTELLIGENCE RESULT")
+    print("\nMETRAVISION FINAL INTELLIGENCE")
     print("--------------------------------")
 
-    print("Risk Score:", result["risk_score"])
-    print("Risk Level:", result["risk_level"])
-    print("Priority Score:", result["priority_score"])
-    print("Inspection Priority:", result["inspection_priority"])
-    print("Issues Found:", result["issues_count"])
+    print("\nRISK")
+    print("----")
 
-    print("\nRISK COMPONENTS")
+    print("Risk Score:",
+          result["risk"]["risk_score"])
+
+    print("Risk Level:",
+          result["risk"]["risk_level"])
+
+    print("Severity Score:",
+          result["risk"]["severity_score"])
+
+    print("Confidence Score:",
+          result["risk"]["confidence_score"])
+
+    print("\nEVIDENCE")
+    print("--------")
+
+    print("Overall Confidence:",
+          result["evidence"]["overall_confidence"])
+
+    print("Evidence Valid:",
+          result["evidence"]["evidence_valid"])
+
+    for evidence in result["evidence"]["records"]:
+
+        print("\nViolation:",
+              evidence["violation"])
+
+        print("Detected Text:",
+              evidence["detected_text"])
+
+        print("Bounding Box:",
+              evidence["bounding_box"])
+
+        print("Rule:",
+              evidence["rule_id"])
+
+        print("Evidence Confidence:",
+              evidence["evidence_confidence"])
+
+        print("Confidence Level:",
+              evidence["confidence_level"])
+
+        print("Valid:",
+              evidence["valid"])
+
+    print("\nINSPECTION")
+    print("----------")
+
+    print("Priority Score:",
+          result["inspection"]["priority_score"])
+
+    print("Inspection Priority:",
+          result["inspection"]["inspection_priority"])
+
+    print("\nOFFICER DECISION")
     print("----------------")
 
-    print("Severity Score:", result["severity_score"])
-    print("Confidence Score:", result["confidence_score"])
-    print("History Score:", result["history_score"])
-    print("Repeat Violation Score:", result["repeat_score"])
+    print("Decision:",
+          result["decision"]["officer_decision"])
 
-    print("\nHISTORY")
-    print("-------")
+    print("Reason:",
+          result["decision"]["decision_reason"])
 
-    print("Violation History:",
-          result["violation_history"])
+    print("\nOFFICER RECOMMENDATION")
+    print("----------------------")
 
-    print("Manufacturer History:",
-          result["manufacturer_history"])
-
-    print("Repeat Violation:",
-          result["repeat_violation"])
-
-    print("Violation Frequency:",
-          result["violation_frequency"])
+    print(result["officer_recommendation"])
 
     print("\nWHY IS THIS RISKY?")
     print("------------------")
@@ -161,6 +328,7 @@ if __name__ == "__main__":
     for item in result["explanations"]:
         print("-", item["explanation"])
 
-    print("\nRECOMMENDATION")
-    print("--------------")
+    print("\nGENERAL RECOMMENDATION")
+    print("----------------------")
+
     print(result["recommendation"])
