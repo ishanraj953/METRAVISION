@@ -16,6 +16,14 @@ from comparison_engine import (
     requires_manual_verification
 )
 
+# Day 3 imports
+from drift_engine import detect_compliance_drift
+from version_engine import create_product_versions
+from offender_engine import analyze_repeat_offenders
+from manufacturer_engine import calculate_manufacturer_risk
+from inspection_engine import rank_products
+from summary_engine import create_intelligence_summary
+
 
 def analyze_product(
     issues,
@@ -24,7 +32,11 @@ def analyze_product(
     repeat_violation=False,
     violation_frequency=0,
     physical_product=None,
-    online_product=None
+    online_product=None,
+    scans=None,
+    offender_records=None,
+    manufacturer_profile=None,
+    product_risk_data=None
 ):
     """
     Complete METRAVISION intelligence analysis.
@@ -172,7 +184,102 @@ def analyze_product(
         )
 
     # -----------------------------
-    # 9. Decision Engine
+    # 9. Compliance Drift Detection
+    # -----------------------------
+
+    drift_result = {
+        "compliance_drift": False,
+        "changes": []
+    }
+
+    if scans is not None:
+
+        drift_result = detect_compliance_drift(
+            scans
+        )
+
+    # -----------------------------
+    # 10. Product Versioning
+    # -----------------------------
+
+    product_versions = []
+
+    if scans is not None:
+
+        product_versions = create_product_versions(
+            scans
+        )
+
+    # -----------------------------
+    # 11. Repeat Offender Intelligence
+    # -----------------------------
+
+    offender_results = []
+
+    if offender_records is not None:
+
+        offender_results = analyze_repeat_offenders(
+            offender_records
+        )
+
+    repeat_offender_detected = (
+        repeat_violation
+        or any(
+            item["repeat_offender"]
+            for item in offender_results
+        )
+    )
+
+    # -----------------------------
+    # 12. Manufacturer Risk Profile
+    # -----------------------------
+
+    manufacturer_risk = {}
+
+    if manufacturer_profile is not None:
+
+        manufacturer_risk = calculate_manufacturer_risk(
+
+            manufacturer=manufacturer_profile.get(
+                "manufacturer",
+                "Unknown"
+            ),
+
+            total_inspections=manufacturer_profile.get(
+                "total_inspections",
+                0
+            ),
+
+            total_products=manufacturer_profile.get(
+                "total_products",
+                0
+            ),
+
+            violations=manufacturer_profile.get(
+                "violations",
+                0
+            ),
+
+            repeat_violations=manufacturer_profile.get(
+                "repeat_violations",
+                0
+            )
+        )
+
+    # -----------------------------
+    # 13. Inspection Recommendation
+    # -----------------------------
+
+    inspection_recommendations = []
+
+    if product_risk_data is not None:
+
+        inspection_recommendations = rank_products(
+            product_risk_data
+        )
+
+    # -----------------------------
+    # 14. Decision Engine
     # -----------------------------
 
     decision_result = make_decision(
@@ -191,7 +298,7 @@ def analyze_product(
     ]
 
     # -----------------------------
-    # 10. Officer Recommendation
+    # 15. Officer Recommendation
     # -----------------------------
 
     officer_result = generate_officer_recommendation(
@@ -201,7 +308,7 @@ def analyze_product(
     )
 
     # -----------------------------
-    # 11. Explanations
+    # 16. Explanations
     # -----------------------------
 
     explanations = generate_explanation(
@@ -209,7 +316,7 @@ def analyze_product(
     )
 
     # -----------------------------
-    # 12. General Recommendation
+    # 17. General Recommendation
     # -----------------------------
 
     recommendation = generate_recommendation(
@@ -221,15 +328,53 @@ def analyze_product(
     )
 
     # -----------------------------
-    # 13. Final Intelligence Output
+    # 18. Final Intelligence Summary
+    # -----------------------------
+
+    online_mismatch_detected = (
+        len(confirmed_mismatches) > 0
+    )
+
+    final_inspection_priority = (
+        inspection_priority
+    )
+
+    if inspection_recommendations:
+
+        final_inspection_priority = (
+            inspection_recommendations[0][
+                "inspection_priority"
+            ]
+        )
+
+    intelligence_summary = (
+        create_intelligence_summary(
+
+            risk_score=risk_score,
+
+            risk_level=risk_level,
+
+            inspection_priority=final_inspection_priority,
+
+            repeat_offender=repeat_offender_detected,
+
+            compliance_drift=drift_result[
+                "compliance_drift"
+            ],
+
+            online_mismatch=online_mismatch_detected,
+
+            manual_review=manual_review_required
+        )
+    )
+
+    # -----------------------------
+    # 19. Final Intelligence Output
     # -----------------------------
 
     return {
 
-        # -------------------------
         # Risk
-        # -------------------------
-
         "risk": {
 
             "risk_score": risk_score,
@@ -253,10 +398,7 @@ def analyze_product(
             ]
         },
 
-        # -------------------------
         # Evidence
-        # -------------------------
-
         "evidence": {
 
             "overall_confidence":
@@ -269,10 +411,7 @@ def analyze_product(
                 validated_evidence
         },
 
-        # -------------------------
         # Human-in-the-Loop
-        # -------------------------
-
         "manual_review": {
 
             "required":
@@ -282,10 +421,7 @@ def analyze_product(
                 manual_review_message
         },
 
-        # -------------------------
         # Cross-Channel Comparison
-        # -------------------------
-
         "comparison": {
 
             "results":
@@ -298,10 +434,27 @@ def analyze_product(
                 comparison_manual_reviews
         },
 
-        # -------------------------
-        # History
-        # -------------------------
+        # Day 3 - Compliance Drift
+        "compliance_drift":
+            drift_result,
 
+        # Day 3 - Product Versions
+        "product_versions":
+            product_versions,
+
+        # Day 3 - Repeat Offender
+        "repeat_offender":
+            offender_results,
+
+        # Day 3 - Manufacturer Risk
+        "manufacturer_risk":
+            manufacturer_risk,
+
+        # Day 3 - Inspection Recommendation
+        "inspection_recommendations":
+            inspection_recommendations,
+
+        # History
         "history": {
 
             "violation_history":
@@ -317,10 +470,7 @@ def analyze_product(
                 violation_frequency
         },
 
-        # -------------------------
         # Inspection
-        # -------------------------
-
         "inspection": {
 
             "priority_score":
@@ -330,10 +480,7 @@ def analyze_product(
                 inspection_priority
         },
 
-        # -------------------------
         # Officer Decision
-        # -------------------------
-
         "decision": {
 
             "officer_decision":
@@ -343,28 +490,23 @@ def analyze_product(
                 decision_reason
         },
 
-        # -------------------------
         # Explanation
-        # -------------------------
-
         "explanations":
             explanations,
 
-        # -------------------------
         # Recommendation
-        # -------------------------
-
         "recommendation":
             recommendation,
 
-        # -------------------------
         # Officer Recommendation
-        # -------------------------
-
         "officer_recommendation":
             officer_result[
                 "officer_recommendation"
-            ]
+            ],
+
+        # Final Day 3 Summary
+        "intelligence_summary":
+            intelligence_summary
     }
 
 
@@ -381,7 +523,8 @@ if __name__ == "__main__":
     issues = [
 
         {
-            "type": "mrp_violation",
+            "type":
+                "mrp_violation",
 
             "detected_text":
                 "MRP ₹999",
@@ -406,7 +549,8 @@ if __name__ == "__main__":
         },
 
         {
-            "type": "missing_declaration",
+            "type":
+                "missing_declaration",
 
             "detected_text":
                 "",
@@ -542,6 +686,204 @@ if __name__ == "__main__":
     }
 
     # ---------------------------------
+    # Phase 12 - Scan History
+    # ---------------------------------
+
+    scans = [
+
+        {
+            "scan_id": 1,
+            "mrp": "₹499",
+            "net_quantity": "500g",
+            "manufacturer": "ABC Foods Pvt Ltd",
+            "declaration": "Present",
+            "packaging": "Blue Pack"
+        },
+
+        {
+            "scan_id": 2,
+            "mrp": "₹499",
+            "net_quantity": "500g",
+            "manufacturer": "ABC Foods Pvt Ltd",
+            "declaration": "Present",
+            "packaging": "Blue Pack"
+        },
+
+        {
+            "scan_id": 3,
+            "mrp": "₹599",
+            "net_quantity": "500g",
+            "manufacturer": "ABC Foods Pvt Ltd",
+            "declaration": "Present",
+            "packaging": "New Blue Pack"
+        }
+    ]
+
+    # ---------------------------------
+    # Phase 14 - Offender Records
+    # ---------------------------------
+
+    offender_records = [
+
+        {
+            "manufacturer": "ABC Pvt Ltd",
+            "brand": "ABC",
+            "product": "ABC Biscuits",
+            "violation_type": "MRP violation"
+        },
+
+        {
+            "manufacturer": "ABC Pvt Ltd",
+            "brand": "ABC",
+            "product": "ABC Biscuits",
+            "violation_type": "MRP violation"
+        },
+
+        {
+            "manufacturer": "ABC Pvt Ltd",
+            "brand": "ABC",
+            "product": "ABC Biscuits",
+            "violation_type": "Missing declaration"
+        },
+
+        {
+            "manufacturer": "ABC Pvt Ltd",
+            "brand": "ABC",
+            "product": "ABC Biscuits",
+            "violation_type": "Online mismatch"
+        }
+    ]
+
+    # ---------------------------------
+    # Phase 15 - Manufacturer Profile
+    # ---------------------------------
+
+    manufacturer_profile = {
+
+        "manufacturer":
+            "ABC Pvt Ltd",
+
+        "total_inspections":
+            10,
+
+        "total_products":
+            8,
+
+        "violations":
+            8,
+
+        "repeat_violations":
+            5
+    }
+
+    # ---------------------------------
+    # Phase 16 - Product Risk Data
+    # ---------------------------------
+
+    product_risk_data = [
+
+        {
+            "product":
+                "Product A",
+
+            "risk_score":
+                86,
+
+            "risk_level":
+                "CRITICAL",
+
+            "repeat_violation":
+                True,
+
+            "compliance_drift":
+                True,
+
+            "online_mismatch":
+                True
+        },
+
+        {
+            "product":
+                "Product B",
+
+            "risk_score":
+                65,
+
+            "risk_level":
+                "HIGH",
+
+            "repeat_violation":
+                True,
+
+            "compliance_drift":
+                False,
+
+            "online_mismatch":
+                True
+        },
+
+        {
+            "product":
+                "Product C",
+
+            "risk_score":
+                55,
+
+            "risk_level":
+                "HIGH",
+
+            "repeat_violation":
+                False,
+
+            "compliance_drift":
+                True,
+
+            "online_mismatch":
+                False
+        },
+
+        {
+            "product":
+                "Product D",
+
+            "risk_score":
+                35,
+
+            "risk_level":
+                "MEDIUM",
+
+            "repeat_violation":
+                False,
+
+            "compliance_drift":
+                False,
+
+            "online_mismatch":
+                False
+        },
+
+        {
+            "product":
+                "Product E",
+
+            "risk_score":
+                15,
+
+            "risk_level":
+                "LOW",
+
+            "repeat_violation":
+                False,
+
+            "compliance_drift":
+                False,
+
+            "online_mismatch":
+                False
+        }
+    ]
+
+    # ---------------------------------
     # Run Complete Analysis
     # ---------------------------------
 
@@ -559,7 +901,15 @@ if __name__ == "__main__":
 
         physical_product=physical_product,
 
-        online_product=online_product
+        online_product=online_product,
+
+        scans=scans,
+
+        offender_records=offender_records,
+
+        manufacturer_profile=manufacturer_profile,
+
+        product_risk_data=product_risk_data
     )
 
     # ---------------------------------
@@ -613,76 +963,12 @@ if __name__ == "__main__":
         result["evidence"]["evidence_valid"]
     )
 
-    for evidence in result[
-        "evidence"
-    ]["records"]:
-
-        print(
-            "\nViolation:",
-            evidence["violation"]
-        )
-
-        print(
-            "Detected Text:",
-            evidence["detected_text"]
-        )
-
-        print(
-            "Bounding Box:",
-            evidence["bounding_box"]
-        )
-
-        print(
-            "Rule:",
-            evidence["rule_id"]
-        )
-
-        print(
-            "Reason:",
-            evidence["reason"]
-        )
-
-        print(
-            "OCR Confidence:",
-            evidence["ocr_confidence"]
-        )
-
-        print(
-            "Image Quality:",
-            evidence["image_quality"]
-        )
-
-        print(
-            "Rule Certainty:",
-            evidence["rule_certainty"]
-        )
-
-        print(
-            "Evidence Confidence:",
-            evidence["evidence_confidence"]
-        )
-
-        print(
-            "Confidence Level:",
-            evidence["confidence_level"]
-        )
-
-        print(
-            "Valid:",
-            evidence["valid"]
-        )
-
     # ---------------------------------
     # HUMAN-IN-THE-LOOP
     # ---------------------------------
 
     print("\nHUMAN-IN-THE-LOOP")
     print("-----------------")
-
-    print(
-        "Evidence Confidence:",
-        result["evidence"]["overall_confidence"]
-    )
 
     print(
         "Manual Review Required:",
@@ -695,7 +981,7 @@ if __name__ == "__main__":
     )
 
     # ---------------------------------
-    # CROSS-CHANNEL COMPARISON
+    # CROSS-CHANNEL
     # ---------------------------------
 
     print("\nCROSS-CHANNEL COMPARISON")
@@ -706,87 +992,163 @@ if __name__ == "__main__":
     ]["results"]:
 
         print(
-            "\nField:",
-            item["field"]
-        )
-
-        print(
-            "Physical:",
-            item["physical_value"]
-        )
-
-        print(
-            "Online:",
-            item["online_value"]
-        )
-
-        print(
-            "Comparison Confidence:",
-            item["comparison_confidence"]
-        )
-
-        print(
-            "Confidence Level:",
-            item["confidence_level"]
-        )
-
-        print(
-            "Status:",
-            item["status"]
-        )
-
-    # ---------------------------------
-    # CONFIRMED MISMATCHES
-    # ---------------------------------
-
-    print("\nCONFIRMED MISMATCHES")
-    print("--------------------")
-
-    for item in result[
-        "comparison"
-    ]["confirmed_mismatches"]:
-
-        print(
             item["field"],
-            "->",
+            ":",
             item["physical_value"],
             "vs",
-            item["online_value"]
-        )
-
-    # ---------------------------------
-    # COMPARISON MANUAL VERIFICATION
-    # ---------------------------------
-
-    print("\nCOMPARISON MANUAL VERIFICATION")
-    print("------------------------------")
-
-    for item in result[
-        "comparison"
-    ]["manual_verification"]:
-
-        print(
-            item["field"],
+            item["online_value"],
             "->",
             item["status"]
         )
 
     # ---------------------------------
-    # INSPECTION
+    # PHASE 12
     # ---------------------------------
 
-    print("\nINSPECTION")
-    print("----------")
+    print("\nCOMPLIANCE DRIFT")
+    print("----------------")
 
     print(
-        "Priority Score:",
-        result["inspection"]["priority_score"]
+        "Drift Detected:",
+        result["compliance_drift"][
+            "compliance_drift"
+        ]
     )
 
-    print(
-        "Inspection Priority:",
-        result["inspection"]["inspection_priority"]
-    )
+    for change in result[
+        "compliance_drift"
+    ]["changes"]:
+
+        print(
+            change["field"],
+            ":",
+            change["previous_value"],
+            "->",
+            change["current_value"]
+        )
+
+    # ---------------------------------
+    # PHASE 13
+    # ---------------------------------
+
+    print("\nPRODUCT VERSIONING")
+    print("-------------------")
+
+    for version in result[
+        "product_versions"
+    ]:
+
+        print(
+            "Version",
+            version["version"],
+            "| Scan",
+            version["scan_id"],
+            "| Changes:",
+            version["changes"]
+        )
+
+    # ---------------------------------
+    # PHASE 14
+    # ---------------------------------
+
+    print("\nREPEAT OFFENDER INTELLIGENCE")
+    print("----------------------------")
+
+    for offender in result[
+        "repeat_offender"
+    ]:
+
+        print(
+            offender["manufacturer"],
+            "|",
+            offender["product"],
+            "| Total Violations:",
+            offender["total_violations"],
+            "| Repeat Offender:",
+            offender["repeat_offender"]
+        )
+
+    # ---------------------------------
+    # PHASE 15
+    # ---------------------------------
+
+    print("\nMANUFACTURER RISK PROFILE")
+    print("--------------------------")
+
+    if result["manufacturer_risk"]:
+
+        print(
+            "Manufacturer:",
+            result["manufacturer_risk"][
+                "manufacturer"
+            ]
+        )
+
+        print(
+            "Inspections:",
+            result["manufacturer_risk"][
+                "total_inspections"
+            ]
+        )
+
+        print(
+            "Products:",
+            result["manufacturer_risk"][
+                "total_products"
+            ]
+        )
+
+        print(
+            "Violations:",
+            result["manufacturer_risk"][
+                "violations"
+            ]
+        )
+
+        print(
+            "Repeat Violations:",
+            result["manufacturer_risk"][
+                "repeat_violations"
+            ]
+        )
+
+        print(
+            "Risk Score:",
+            result["manufacturer_risk"][
+                "risk_score"
+            ]
+        )
+
+        print(
+            "Risk Level:",
+            result["manufacturer_risk"][
+                "risk_level"
+            ]
+        )
+
+    # ---------------------------------
+    # PHASE 16
+    # ---------------------------------
+
+    print("\nINSPECTION RECOMMENDATION")
+    print("-------------------------")
+
+    for index, product in enumerate(
+        result["inspection_recommendations"],
+        start=1
+    ):
+
+        print(
+            index,
+            ".",
+            product["product"],
+            "|",
+            product["risk_level"],
+            "| Score:",
+            product["priority_score"],
+            "| Priority:",
+            product["inspection_priority"]
+        )
 
     # ---------------------------------
     # OFFICER DECISION
@@ -817,17 +1179,19 @@ if __name__ == "__main__":
     )
 
     # ---------------------------------
-    # WHY IS THIS RISKY?
+    # FINAL DAY 3 SUMMARY
     # ---------------------------------
 
-    print("\nWHY IS THIS RISKY?")
-    print("------------------")
+    print("\nCOMPLIANCE INTELLIGENCE SUMMARY")
+    print("--------------------------------")
 
-    for item in result["explanations"]:
+    for key, value in result[
+        "intelligence_summary"
+    ].items():
 
         print(
-            "-",
-            item["explanation"]
+            key + ":",
+            value
         )
 
     # ---------------------------------
