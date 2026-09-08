@@ -62,12 +62,13 @@ def validate_bbox(
 def build_ocr_evidence(result):
     return {
         "text": result.text,
-        "confidence": round(result.confidence, 4),
+        "confidence": round(float(result.confidence), 4),
         "confidence_level": classify_confidence(
             result.confidence
         ),
         "bbox": result.bbox,
         "polygon": result.polygon,
-        "source": result.source
+        "source": result.source,
+        "page": getattr(result, "page", 1)
     }
 

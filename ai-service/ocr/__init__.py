@@ -35,8 +35,21 @@ from .postprocess import (
 )
 
 from .declaration_extractor import (
+    extract_declarations,
     extract_declaration_value,
     classify_mfd_use_by_dates,
+    extract_mrp,
+    extract_net_quantity,
+    extract_net_weight,
+    extract_unit_sale_price,
+    extract_standalone_unit_price,
+    extract_manufacturer,
+    extract_packer,
+    extract_importer,
+    extract_consumer_care,
+    extract_manufacturing_date,
+    extract_country_of_origin,
+    extract_product_name_candidate,
 )
 
 from .confidence import (
@@ -81,11 +94,24 @@ __all__ = [
     "classify_confidence",
     "filter_by_confidence",
     "validate_bbox",
-    "build_ocr_evidence"
+    "build_ocr_evidence",
 
     "normalize_ocr_result",
     "build_normalized_ocr_output",
 
+    "extract_declarations",
     "extract_declaration_value",
     "classify_mfd_use_by_dates",
+    "extract_mrp",
+    "extract_net_quantity",
+    "extract_net_weight",
+    "extract_unit_sale_price",
+    "extract_standalone_unit_price",
+    "extract_manufacturer",
+    "extract_packer",
+    "extract_importer",
+    "extract_consumer_care",
+    "extract_manufacturing_date",
+    "extract_country_of_origin",
+    "extract_product_name_candidate",
 ]

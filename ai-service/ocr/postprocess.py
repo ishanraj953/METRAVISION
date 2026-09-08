@@ -68,11 +68,11 @@ def normalize_text(text: str) -> str:
     flags=re.IGNORECASE
     )
 
-    # Remove punctuation accidentally left immediately
+    # Remove punctuation/colons accidentally left immediately
     # after normalized declaration labels
     text = re.sub(
-        r"\b(NET WEIGHT|MRP|NET QUANTITY)\s*\.",
-        r"\1",
+        r"\b(NET WEIGHT|MRP|NET QUANTITY|UNIT SALE PRICE)\s*[:.\-–—]\s*",
+        r"\1 ",
         text,
         flags=re.IGNORECASE
     )
@@ -388,17 +388,20 @@ def extract_dates_from_text(text: str) -> List[str]:
 # ============================================================
 
 PHONE_PATTERNS = [
+    # Toll-free 1800 / 1860
+    r"\b18[06]0[\s-]*\d{3,4}[\s-]*\d{3,4}\b",
+
     # +91 98765 43210
     r"\+91[\s-]*\d{5}[\s-]*\d{5}",
+
+    # +919876543210
+    r"\+91\d{10}",
 
     # 98765 43210
     r"\b\d{5}[\s-]\d{5}\b",
 
     # 9876543210
     r"\b[6-9]\d{9}\b",
-
-    # +919876543210
-    r"\+91\d{10}",
 ]
 
 
@@ -406,8 +409,10 @@ def normalize_phone(phone: str) -> str:
     """
     Normalize Indian phone number.
     """
-
     digits = re.sub(r"\D", "", phone)
+
+    if digits.startswith("1800") or digits.startswith("1860"):
+        return digits
 
     if digits.startswith("91") and len(digits) == 12:
         return "+" + digits
