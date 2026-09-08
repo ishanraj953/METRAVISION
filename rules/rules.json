@@ -1,0 +1,112 @@
+[
+  {
+    "rule_id": "LM-PC-001",
+    "field": "mrp",
+    "category": ["GENERAL"],
+    "requirement": "MRP declaration required",
+    "severity": "HIGH",
+    "effective_from": "2022-04-01",
+    "version": "1.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules"
+  },
+  {
+    "rule_id": "LM-PC-002",
+    "field": "manufacturer_name",
+    "category": ["GENERAL"],
+    "requirement": "Manufacturer name required",
+    "severity": "HIGH",
+    "effective_from": "2022-04-01",
+    "version": "1.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules"
+  },
+  {
+    "rule_id": "LM-PC-003",
+    "field": "net_quantity",
+    "category": ["GENERAL"],
+    "requirement": "Net quantity declaration required",
+    "severity": "HIGH",
+    "effective_from": "2022-04-01",
+    "version": "1.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules"
+  },
+  {
+    "rule_id": "LM-PC-004",
+    "field": "consumer_care",
+    "category": ["GENERAL"],
+    "requirement": "Consumer care details required",
+    "severity": "MEDIUM",
+    "effective_from": "2022-04-01",
+    "version": "1.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules"
+  },
+  {
+  "rule_id": "LM-PC-005",
+  "field": "manufacturing_packing_date",
+  "category": ["GENERAL"],
+  "requirement": "Manufacturing/Packing date required",
+  "severity": "HIGH",
+  "effective_from": "2022-04-01",
+  "version": "1.0",
+  "status": "ACTIVE",
+  "source": "Legal Metrology (Packaged Commodities) Rules"
+ },
+ {
+  "rule_id": "LM-PC-006",
+  "field": "country_of_origin",
+  "category": ["IMPORTED"],
+  "requirement": "Country of origin declaration required",
+  "severity": "HIGH",
+  "effective_from": "2022-04-01",
+  "version": "1.0",
+  "status": "ACTIVE",
+  "source": "Legal Metrology (Packaged Commodities) Rules"
+ },
+ {
+  "rule_id": "LM-PC-007",
+  "field": "importer_name",
+  "category": ["IMPORTED"],
+  "requirement": "Importer name declaration required",
+  "severity": "HIGH",
+  "effective_from": "2022-04-01",
+  "version": "1.0",
+  "status": "ACTIVE",
+  "source": "Legal Metrology (Packaged Commodities) Rules"
+},
+{
+  "rule_id": "LM-PC-008",
+  "field": "importer_address",
+  "category": ["IMPORTED"],
+  "requirement": "Importer address declaration required",
+  "severity": "HIGH",
+  "effective_from": "2022-04-01",
+  "version": "1.0",
+  "status": "ACTIVE",
+  "source": "Legal Metrology (Packaged Commodities) Rules"
+},
+{
+  "rule_id": "LM-PC-009",
+  "field": "unit_sale_price",
+  "category": ["E_COMMERCE"],
+  "requirement": "Unit sale price declaration required",
+  "severity": "MEDIUM",
+  "effective_from": "2022-04-01",
+  "version": "1.0",
+  "status": "ACTIVE",
+  "source": "Legal Metrology (Packaged Commodities) Rules"
+},
+{
+  "rule_id": "LM-PC-010",
+  "field": "batch_number",
+  "category": ["GENERAL"],
+  "requirement": "Batch/Lot number declaration required",
+  "severity": "MEDIUM",
+  "effective_from": "2022-04-01",
+  "version": "1.0",
+  "status": "ACTIVE",
+  "source": "Legal Metrology (Packaged Commodities) Rules"
+}
+]

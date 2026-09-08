@@ -1,0 +1,23 @@
+{
+  "GENERAL": {
+    "description": "Standard packaged commodities"
+  },
+  "FOOD": {
+    "description": "Food products"
+  },
+  "ELECTRONICS": {
+    "description": "Electronic products"
+  },
+  "GARMENTS": {
+    "description": "Clothing and textile products"
+  },
+  "IMPORTED": {
+    "description": "Imported products"
+  },
+  "MULTI_PACK": {
+    "description": "Multi-pack products"
+  },
+  "E_COMMERCE": {
+    "description": "Products sold online"
+  }
+}
