@@ -1,0 +1,56 @@
+:root {
+  --gov-navy: #0b3c5d;
+  --gov-navy-dark: #07253a;
+  --gov-gold: #cfa83b;
+  --gov-bg: #f4f6f9;
+  --gov-border: #dcdfe4;
+  --gov-text: #1d2d35;
+  --gov-text-muted: #596a73;
+  --gov-success: #1b7e41;
+  --gov-danger: #b32400;
+  --gov-warning: #c27b00;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+body {
+  background-color: var(--gov-bg);
+  color: var(--gov-text);
+  font-size: 14px;
+}
+
+/* Top Gov Ribbon */
+.gov-top-strip {
+  background: var(--gov-navy-dark);
+  color: #ffffff;
+  padding: 6px 24px;
+  font-size: 11px;
+  display: flex;
+  justify-content: space-between;
+  letter-spacing: 0.5px;
+}
+
+/* Official Card Box */
+.gov-card {
+  background: #ffffff;
+  border: 1px solid var(--gov-border);
+  border-top: 4px solid var(--gov-navy);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Badges */
+.gov-badge {
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.badge-critical { background: #fde8e8; color: var(--gov-danger); border: 1px solid #f8b4b4; }
+.badge-high { background: #fef08a; color: var(--gov-warning); border: 1px solid #fde047; }
+.badge-compliant { background: #def7ec; color: var(--gov-success); border: 1px solid #bcf0da; }
