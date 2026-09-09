@@ -58,13 +58,13 @@
   "rule_id": "LM-PC-006",
   "field": "country_of_origin",
   "category": ["IMPORTED"],
-  "requirement": "Country of origin declaration required",
+  "requirement": "Country of origin declaration required for imported products",
   "severity": "HIGH",
-  "effective_from": "2022-04-01",
-  "version": "1.0",
+  "effective_from": "2017-01-01",
+  "version": "1.1",
   "status": "ACTIVE",
-  "source": "Legal Metrology (Packaged Commodities) Rules"
- },
+  "source": "Legal Metrology (Packaged Commodities) Rules, Rule 6(1)(aa)"
+},
  {
   "rule_id": "LM-PC-007",
   "field": "importer_name",
@@ -89,24 +89,24 @@
 },
 {
   "rule_id": "LM-PC-009",
-  "field": "unit_sale_price",
+  "field": "ecommerce_mandatory_declarations",
   "category": ["E_COMMERCE"],
-  "requirement": "Unit sale price declaration required",
-  "severity": "MEDIUM",
-  "effective_from": "2022-04-01",
-  "version": "1.0",
+  "requirement": "Mandatory package declarations must be displayed on e-commerce platform",
+  "severity": "HIGH",
+  "effective_from": "2018-01-01",
+  "version": "1.1",
   "status": "ACTIVE",
-  "source": "Legal Metrology (Packaged Commodities) Rules"
+  "source": "Legal Metrology (Packaged Commodities) Rules, Rule 6(10)"
 },
 {
   "rule_id": "LM-PC-010",
-  "field": "batch_number",
+  "field": "commodity_name",
   "category": ["GENERAL"],
-  "requirement": "Batch/Lot number declaration required",
-  "severity": "MEDIUM",
-  "effective_from": "2022-04-01",
-  "version": "1.0",
+  "requirement": "Common or generic name of commodity required",
+  "severity": "HIGH",
+  "effective_from": "2011-03-07",
+  "version": "1.1",
   "status": "ACTIVE",
-  "source": "Legal Metrology (Packaged Commodities) Rules"
+  "source": "Legal Metrology (Packaged Commodities) Rules, Rule 6(1)(b)"
 }
 ]
