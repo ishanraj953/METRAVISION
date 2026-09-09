@@ -38,39 +38,101 @@ const ScanProduct = () => {
     return () => stopWebcam();
   }, []);
 
-  // Legal Metrology PCR 2011 Rule Evaluator for Coffy Bite / Packaged Confectionery
+  // Dynamic Legal Metrology PCR 2011 Rule Evaluator with Real Validation
   const evaluateLegalMetrologyRules = (combinedText) => {
-    const clean = combinedText.replace(/[\r\n\t]+/g, " ");
+    const clean = combinedText.replace(/[\r\n\t]+/g, " ").toLowerCase();
     
-    // Coffy Bite standard declarations lookup
-    const declarations = [
-      { field: "MRP Declaration", status: "PASS", value: "₹ 5.00 (Incl. of all taxes)", rule: "Rule 6(1)(e)" },
-      { field: "Net Quantity (Metric)", status: "PASS", value: "21.6 g", rule: "Rule 6(1)(c)" },
-      { field: "Date of Mfg / Expiry", status: "PASS", value: "05/26 (NK11 Batch)", rule: "Rule 6(1)(d)" },
-      { field: "Customer Care Helpline", status: "PASS", value: "customercare@lotteindia.com / 18005999059", rule: "Rule 6(1)(h)" },
-      { field: "Manufacturer Details", status: "PASS", value: "Lotte India Corp. Ltd., Chennai", rule: "Rule 6(1)(a)" }
-    ];
+    // Check for blur or empty input
+    if (!clean || clean.length < 5) {
+      return {
+        isEmpty: true,
+        productName: "Unrecognized / Empty Scan",
+        declarations: [],
+        violations: ["Image unreadable or empty scan area."],
+        recommendedPenalty: 1000,
+        isCompliant: false,
+        status: "Needs Review"
+      };
+    }
+
+    let violations = [];
+    let declarations = [];
+
+    // 1. MRP Check
+    const hasMrp = clean.includes("mrp") || clean.includes("₹") || clean.includes("rs");
+    declarations.push({
+      field: "MRP Declaration",
+      status: hasMrp ? "PASS" : "FAIL",
+      value: hasMrp ? "Detected" : "Missing MRP",
+      rule: "Rule 6(1)(e)"
+    });
+    if (!hasMrp) violations.push("Mandatory MRP declaration is missing.");
+
+    // 2. Net Quantity Check
+    const hasQty = clean.includes("g") || clean.includes("kg") || clean.includes("ml") || clean.includes("net qty") || clean.includes("net wt");
+    declarations.push({
+      field: "Net Quantity (Metric)",
+      status: hasQty ? "PASS" : "FAIL",
+      value: hasQty ? "Detected" : "Missing Quantity",
+      rule: "Rule 6(1)(c)"
+    });
+    if (!hasQty) violations.push("Net Quantity declaration is missing.");
+
+    // 3. Date of Mfg / Expiry Check
+    const hasDate = clean.includes("mfd") || clean.includes("pkd") || clean.includes("batch") || clean.includes("packed");
+    declarations.push({
+      field: "Date of Mfg / Expiry",
+      status: hasDate ? "PASS" : "FAIL",
+      value: hasDate ? "Detected" : "Missing Date/Batch",
+      rule: "Rule 6(1)(d)"
+    });
+    if (!hasDate) violations.push("Manufacturing/Packing date is missing.");
+
+    // 4. Customer Care / Helpline Check
+    const hasCustomerCare = clean.includes("care") || clean.includes("consumer") || clean.includes("@") || clean.includes("1800");
+    declarations.push({
+      field: "Customer Care Helpline",
+      status: hasCustomerCare ? "PASS" : "FAIL",
+      value: hasCustomerCare ? "Detected" : "Missing Contact Info",
+      rule: "Rule 6(1)(h)"
+    });
+    if (!hasCustomerCare) violations.push("Consumer care details missing.");
+
+    // 5. Manufacturer Details Check
+    const hasManufacturer = clean.includes("mfg") || clean.includes("manufactured") || clean.includes("marketed") || clean.includes("lotte") || clean.includes("corp") || clean.includes("ltd");
+    declarations.push({
+      field: "Manufacturer Details",
+      status: hasManufacturer ? "PASS" : "FAIL",
+      value: hasManufacturer ? "Detected" : "Missing Manufacturer",
+      rule: "Rule 6(1)(a)"
+    });
+    if (!hasManufacturer) violations.push("Manufacturer/Packer identity details missing.");
+
+    const isCompliant = violations.length === 0;
 
     return {
       isEmpty: false,
-      productName: "Lotte Coffy Bite Classic Confectionery (21.6g)",
+      productName: clean.includes("lotte") ? "Lotte Coffy Bite Confectionery" : "Generic Scanned Commodity",
       declarations,
-      violations: [], // Fully compliant packet
-      recommendedPenalty: 0,
-      isCompliant: true
+      violations,
+      recommendedPenalty: isCompliant ? 0 : 5000,
+      isCompliant,
+      status: isCompliant ? "COMPLIANT" : "NON_COMPLIANT"
     };
   };
 
-  // Quick Preset Simulator optimized for Lotte Coffy Bite (Inspectors' instant audit)
-  const handleQuickAiPreset = () => {
-    setOcrStatus("Coffy Bite Profile Loaded");
-    const sampleText = "MRP ₹ 5.00 Net Wt 21.6g Mfd 05/26 customercare@lotteindia.com Lotte India Chennai";
+  // Quick Preset Simulator optimized for testing compliance or violations
+  const handleQuickAiPreset = (forceValid = true) => {
+    setOcrStatus(forceValid ? "Valid Profile Loaded" : "Violating Profile Loaded");
+    const sampleText = forceValid 
+      ? "MRP ₹ 5.00 Net Wt 21.6g Mfd 05/26 customercare@lotteindia.com Lotte India Chennai"
+      : "Incomplete Label Info Without MRP or Quantity";
     
     setSlotTexts({
-      front: "Lotte Coffy Bite Classic Confectionery",
-      back: "Ingredients Sugar Liquid Glucose Mkt by Lotte India Chennai",
-      side1: "Lotte Coffy Bite Classic Branding Panel",
-      side2: "MRP ₹ 5.00 Net Wt 21.6g Customer Care 18005999059 Mfd 05/26 NK11"
+      front: forceValid ? "Lotte Coffy Bite Classic Confectionery" : "Unknown Candy Wrapper",
+      back: forceValid ? "Ingredients Sugar Liquid Glucose Mkt by Lotte India Chennai" : "No Ingredients",
+      side1: "Classic Branding Panel",
+      side2: forceValid ? "MRP ₹ 5.00 Net Wt 21.6g Customer Care 18005999059 Mfd 05/26 NK11" : "Blank Side"
     });
 
     setPhotos({
@@ -98,7 +160,7 @@ const ScanProduct = () => {
       }
 
       const res = await window.Tesseract.recognize(canvasElement, "eng");
-      const detectedText = res.data.text || "Coffy Bite Verified Packet";
+      const detectedText = res.data.text || "";
 
       const updatedSlotTexts = { ...slotTexts, [targetSlot]: detectedText.trim() };
       setSlotTexts(updatedSlotTexts);
@@ -115,9 +177,8 @@ const ScanProduct = () => {
       if (nextSlot) setActiveSlot(nextSlot);
     } catch (err) {
       console.error("OCR error:", err);
-      // Fallback to compliant profile if metallic reflection blocks raw OCR
-      setScanResult(evaluateLegalMetrologyRules("MRP ₹ 5.00 Net Wt 21.6g Mfd 05/26 Lotte India"));
-      setOcrStatus("Parsed via Fallback Profile");
+      setScanResult(evaluateLegalMetrologyRules(""));
+      setOcrStatus("OCR Parsing Failed");
     }
   };
 
@@ -192,14 +253,14 @@ const ScanProduct = () => {
       inspectorName: user?.name || "Inspector CHK-109",
       shopName: shopDetails.shopName,
       location: shopDetails.location,
-      productName: scanResult?.productName || "Lotte Coffy Bite",
+      productName: scanResult?.productName || "Scanned Commodity",
       batchNo: shopDetails.batchNo,
       image: photos.front || photos.back || "https://images.unsplash.com/photo-1581798458920-3343ef44729f?w=300",
       multiPhotos: photos,
-      status: "VERIFIED_COMPLIANT",
-      violations: [],
-      penaltyAmount: 0,
-      notes: "Multi-angle audit passed under Legal Metrology Packaged Commodities Rules 2011."
+      status: scanResult?.isCompliant ? "VERIFIED_COMPLIANT" : "NON_COMPLIANT_VIOLATION",
+      violations: scanResult?.violations || [],
+      penaltyAmount: scanResult?.recommendedPenalty || 0,
+      notes: scanResult?.isCompliant ? "Passed Legal Metrology Rules 2011." : "Violations found in mandatory declarations."
     };
 
     addComplaint(payload);
@@ -211,23 +272,28 @@ const ScanProduct = () => {
   return (
     <div style={{ padding: "20px clamp(12px, 3vw, 30px)", maxWidth: "1350px", margin: "0 auto", fontFamily: "Segoe UI, sans-serif" }}>
       
-      {/* Title & Preset Button */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px", flexWrap: "wrap", gap: "10px" }}>
         <div>
           <h1 style={{ fontSize: "22px", fontWeight: 800, color: "#0c3b6b", margin: 0 }}>
             Multi-Angle Commodity Compliance Scanner
           </h1>
           <p style={{ fontSize: "12.5px", color: "#64748b", margin: "4px 0 0 0" }}>
-            Upload metallic/foil packet photos or use Quick AI Preset for instant verification.
+            Upload package photos or use AI presets for dynamic PCR 2011 validation. Status: {ocrStatus}
           </p>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
           <button
-            onClick={handleQuickAiPreset}
-            style={{ background: "#ea580c", color: "#fff", border: "none", padding: "7px 14px", borderRadius: "8px", fontWeight: 800, fontSize: "12px", cursor: "pointer", boxShadow: "0 2px 8px rgba(234,88,12,0.3)" }}
+            onClick={() => handleQuickAiPreset(true)}
+            style={{ background: "#16a34a", color: "#fff", border: "none", padding: "7px 12px", borderRadius: "8px", fontWeight: 800, fontSize: "11.5px", cursor: "pointer" }}
           >
-            ⚡ Quick AI Preset (Audit Coffy Bite)
+            ⚡ Test Valid Product
+          </button>
+          <button
+            onClick={() => handleQuickAiPreset(false)}
+            style={{ background: "#dc2626", color: "#fff", border: "none", padding: "7px 12px", borderRadius: "8px", fontWeight: 800, fontSize: "11.5px", cursor: "pointer" }}
+          >
+            ⚠️ Test Violation Product
           </button>
           <span style={{ fontSize: "12px", background: "#e0f2fe", color: "#0369a1", padding: "4px 12px", borderRadius: "14px", fontWeight: 700 }}>
             Captured: {capturedCount} / 4
@@ -237,7 +303,6 @@ const ScanProduct = () => {
 
       <div style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: "20px" }}>
         
-        {/* Left Column: Slots */}
         <div style={{ background: "#ffffff", padding: "18px", borderRadius: "14px", border: "1px solid #e2e8f0", boxShadow: "0 4px 14px rgba(0,0,0,0.04)" }}>
           
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px", marginBottom: "16px" }}>
@@ -321,8 +386,8 @@ const ScanProduct = () => {
             ) : photos[activeSlot] ? (
               <img src={photos[activeSlot]} alt="Active" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
             ) : (
-              <div style={{ color: "#94a3b8", fontSize: "12px", textAlign: "center" }}>
-                Click <strong>"Quick AI Preset"</strong> above or upload photos 1, 2, 3, 4.
+              <div style={{ color: "#94a3b8", fontSize: "12px", textAlign: "center", padding: "0 20px" }}>
+                Click <strong>"Test Valid Product"</strong> or <strong>"Test Violation Product"</strong> above to simulate audit results.
               </div>
             )}
           </div>
@@ -336,21 +401,20 @@ const ScanProduct = () => {
           </div>
         </div>
 
-        {/* Right Column: Result */}
         <div style={{ background: "#ffffff", padding: "18px", borderRadius: "14px", border: "1px solid #e2e8f0", boxShadow: "0 4px 14px rgba(0,0,0,0.04)" }}>
           <h3 style={{ fontSize: "15px", fontWeight: 700, margin: "0 0 12px 0", color: "#0f172a" }}>
-            2. Combined Multi-Panel Compliance Result
+            2. Dynamic Multi-Panel Compliance Result
           </h3>
 
           {!scanResult ? (
             <div style={{ padding: "60px 20px", textAlign: "center", color: "#94a3b8", fontSize: "13px" }}>
-              Click <strong>"⚡ Quick AI Preset"</strong> to instantly audit the Coffy Bite packet.
+              Select a test preset or upload photos to evaluate rule compliance.
             </div>
           ) : (
             <div>
               <div style={{
-                background: "#f0fdf4",
-                border: "1.5px solid #86efac",
+                background: scanResult.isCompliant ? "#f0fdf4" : "#fef2f2",
+                border: `1.5px solid ${scanResult.isCompliant ? "#86efac" : "#fca5a5"}`,
                 padding: "10px 14px",
                 borderRadius: "8px",
                 display: "flex",
@@ -358,11 +422,11 @@ const ScanProduct = () => {
                 alignItems: "center",
                 marginBottom: "12px"
               }}>
-                <span style={{ fontWeight: 800, fontSize: "12.5px", color: "#166534" }}>
-                  ✔ COMPLIANT COMMODITY (PCR 2011)
+                <span style={{ fontWeight: 800, fontSize: "12px", color: scanResult.isCompliant ? "#166534" : "#991b1b" }}>
+                  {scanResult.isCompliant ? "✔ COMPLIANT COMMODITY (PCR 2011)" : "❌ NON-COMPLIANT VIOLATION DETECTED"}
                 </span>
-                <span style={{ fontSize: "11.5px", fontWeight: 800, color: "#16a34a" }}>
-                  Fine: ₹ 0 (Passed)
+                <span style={{ fontSize: "11px", fontWeight: 800, color: scanResult.isCompliant ? "#16a34a" : "#dc2626" }}>
+                  Fine: ₹ {scanResult.recommendedPenalty}
                 </span>
               </div>
 
@@ -371,21 +435,32 @@ const ScanProduct = () => {
                   <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "12px", background: "#f8fafc", padding: "6px 10px", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
                     <div>
                       <div style={{ fontWeight: 700, color: "#1e293b" }}>{d.field}</div>
-                      <div style={{ fontSize: "10.5px", color: "#047857", fontWeight: 600 }}>{d.value}</div>
+                      <div style={{ fontSize: "10.5px", color: d.status === "PASS" ? "#047857" : "#b91c1c", fontWeight: 600 }}>{d.value} ({d.rule})</div>
                     </div>
-                    <span style={{ fontWeight: 800, fontSize: "11px", color: "#16a34a" }}>
-                      ✔ PASS
+                    <span style={{ fontWeight: 800, fontSize: "11px", color: d.status === "PASS" ? "#16a34a" : "#dc2626" }}>
+                      {d.status === "PASS" ? "✔ PASS" : "✖ FAIL"}
                     </span>
                   </div>
                 ))}
               </div>
 
+              {!scanResult.isCompliant && scanResult.violations.length > 0 && (
+                <div style={{ background: "#fff1f2", border: "1px solid #fecdd3", padding: "10px", borderRadius: "8px", marginBottom: "12px" }}>
+                  <div style={{ fontSize: "11.5px", fontWeight: 800, color: "#9f1239", marginBottom: "4px" }}>Detected Violations:</div>
+                  <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#881337" }}>
+                    {scanResult.violations.map((v, index) => (
+                      <li key={index}>{v}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               {!submittedId ? (
                 <button
                   onClick={handleDispatchComplaint}
-                  style={{ width: "100%", padding: "11px", background: "#0c3b6b", color: "#fff", border: "none", borderRadius: "8px", fontWeight: 800, fontSize: "12.5px", cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}
+                  style={{ width: "100%", padding: "11px", background: scanResult.isCompliant ? "#0c3b6b" : "#dc2626", color: "#fff", border: "none", borderRadius: "8px", fontWeight: 800, fontSize: "12.5px", cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}
                 >
-                  🚀 Submit Compliant Dossier to Admin
+                  {scanResult.isCompliant ? "🚀 Submit Compliant Dossier to Admin" : "🚨 Dispatch Violation Notice & Fine"}
                 </button>
               ) : (
                 <div style={{ background: "#ecfdf5", border: "1px solid #6ee7b7", padding: "10px", borderRadius: "8px", textAlign: "center" }}>
