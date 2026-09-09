@@ -1,0 +1,96 @@
+{
+    "languages": {
+        "en": {
+            "name": "English",
+            "script": "Latin"
+        },
+        "as": {
+            "name": "Assamese",
+            "script": "Bengali"
+        },
+        "bn": {
+            "name": "Bengali",
+            "script": "Bengali"
+        },
+        "brx": {
+            "name": "Bodo",
+            "script": "Devanagari"
+        },
+        "doi": {
+            "name": "Dogri",
+            "script": "Devanagari"
+        },
+        "gu": {
+            "name": "Gujarati",
+            "script": "Gujarati"
+        },
+        "hi": {
+            "name": "Hindi",
+            "script": "Devanagari"
+        },
+        "kn": {
+            "name": "Kannada",
+            "script": "Kannada"
+        },
+        "ks": {
+            "name": "Kashmiri",
+            "script": "Arabic/Devanagari"
+        },
+        "kok": {
+            "name": "Konkani",
+            "script": "Devanagari"
+        },
+        "mai": {
+            "name": "Maithili",
+            "script": "Devanagari"
+        },
+        "ml": {
+            "name": "Malayalam",
+            "script": "Malayalam"
+        },
+        "mni": {
+            "name": "Manipuri",
+            "script": "Bengali/Meitei"
+        },
+        "mr": {
+            "name": "Marathi",
+            "script": "Devanagari"
+        },
+        "ne": {
+            "name": "Nepali",
+            "script": "Devanagari"
+        },
+        "or": {
+            "name": "Odia",
+            "script": "Odia"
+        },
+        "pa": {
+            "name": "Punjabi",
+            "script": "Gurmukhi"
+        },
+        "sa": {
+            "name": "Sanskrit",
+            "script": "Devanagari"
+        },
+        "sat": {
+            "name": "Santali",
+            "script": "Ol Chiki"
+        },
+        "sd": {
+            "name": "Sindhi",
+            "script": "Arabic/Devanagari"
+        },
+        "ta": {
+            "name": "Tamil",
+            "script": "Tamil"
+        },
+        "te": {
+            "name": "Telugu",
+            "script": "Telugu"
+        },
+        "ur": {
+            "name": "Urdu",
+            "script": "Arabic"
+        }
+    }
+}
