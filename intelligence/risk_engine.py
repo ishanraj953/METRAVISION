@@ -1,4 +1,7 @@
 import json
+from pathlib import Path
+
+SEVERITY_FILE = Path(__file__).resolve().parent.parent / "rules" / "severity.json"
 
 
 def create_risk_data(
@@ -40,12 +43,9 @@ def calculate_risk_score(
     4. Repeat violation
     """
 
-    import os
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    target_path = os.path.join(base_dir, "rules", "severity.json")
-    if not os.path.exists(target_path):
-        target_path = "rules/severity.json"
-    with open(target_path, "r", encoding="utf-8") as file:
+    # Load severity scores from Rule Engine
+    path = SEVERITY_FILE if SEVERITY_FILE.exists() else Path("rules/severity.json")
+    with open(path, "r") as file:
         severity_data = json.load(file)
 
     # -----------------------------

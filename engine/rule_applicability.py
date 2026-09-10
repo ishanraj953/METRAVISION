@@ -1,12 +1,11 @@
 import json
-import os
+from pathlib import Path
+
+RULES_FILE = Path(__file__).resolve().parent.parent / "rules" / "rules.json"
 
 def load_rules():
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    target_path = os.path.join(base_dir, "rules", "rules.json")
-    if not os.path.exists(target_path):
-        target_path = "rules/rules.json"
-    with open(target_path, "r", encoding="utf-8") as file:
+    path = RULES_FILE if RULES_FILE.exists() else Path("rules/rules.json")
+    with open(path, "r") as file:
         rules = json.load(file)
     return rules
 
