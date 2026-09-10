@@ -99,13 +99,9 @@ class METRAVisionPipeline:
             target_image_path
         )
 
-        if not quality["usable"]:
-            return {
-                "status": "INSUFFICIENT_EVIDENCE",
-                "message": quality.get("message", "Image quality gate rejected input"),
-                "preprocessing": preprocessing,
-                "quality": quality,
-            }
+        # Log quality metrics but do not block OCR extraction
+        if not quality.get("usable"):
+            quality["quality_warning"] = "Image quality is low, but proceeding with OCR extraction."
 
         # =====================================================
         # PHASE 3 — OCR ENGINE & MULTILINGUAL OCR PROCESSING

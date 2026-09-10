@@ -65,7 +65,7 @@ class AIService:
                 except Exception:
                     pass
 
-                if res and res.get("status") == "SUCCESS":
+                if res and ("declarations" in res or "ocr" in res):
                     quality_score = float(res.get("quality", {}).get("quality_score", 90.0))
                     
                     # Extract OCR text
@@ -100,8 +100,9 @@ class AIService:
                         raw_ocr_text=raw_ocr or "PACKAGE LABEL TEXT",
                         full_pipeline_output=res
                     )
-            except Exception:
-                pass
+            except Exception as e:
+                import logging
+                logging.getLogger("ai_service").error(f"Error in process_package pipeline: {e}")
 
         # Realistic fallback extraction based on category/hints for test suites
         declarations = {
