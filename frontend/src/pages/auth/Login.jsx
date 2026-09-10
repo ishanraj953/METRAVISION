@@ -16,7 +16,7 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import emblemImg from "../../assets/india.png";
 
-const API_BASE = "http://127.0.0.1:8000";
+import { API_BASE_URL as API_BASE } from "../../services/api";
 
 const Login = () => {
   const navigate = useNavigate();
