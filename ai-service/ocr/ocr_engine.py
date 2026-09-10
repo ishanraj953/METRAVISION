@@ -28,6 +28,18 @@ try:
 except Exception:
     HAS_PADDLEOCR = False
 
+try:
+    import easyocr
+    HAS_EASYOCR = True
+except Exception:
+    HAS_EASYOCR = False
+
+try:
+    import pytesseract
+    HAS_PYTESSERACT = True
+except Exception:
+    HAS_PYTESSERACT = False
+
 
 class OCREngine:
 
@@ -35,6 +47,7 @@ class OCREngine:
         self.lang = lang
         self.device = device
         self._paddle_ocr = None
+        self._easy_ocr = None
 
     def _get_paddle_ocr(self):
         if self._paddle_ocr is None and HAS_PADDLEOCR:
@@ -51,6 +64,14 @@ class OCREngine:
             except Exception as e:
                 logger.warning(f"Could not initialize PaddleOCR: {e}")
         return self._paddle_ocr
+
+    def _get_easy_ocr(self):
+        if self._easy_ocr is None and HAS_EASYOCR:
+            try:
+                self._easy_ocr = easyocr.Reader([self.lang], gpu=False)
+            except Exception as e:
+                logger.warning(f"Could not initialize EasyOCR: {e}")
+        return self._easy_ocr
 
     def extract_text(self, image_path: str, page: int = 1) -> List[OCRResult]:
 
@@ -176,6 +197,58 @@ class OCREngine:
                             page=page,
                             image_path=str_path
                         )
-                    )
+        # 3. Tertiary Engine: EasyOCR Cross-Platform Fallback (Linux / Render cloud fallback)
+        if not ocr_results:
+            easy_ocr = self._get_easy_ocr()
+            if easy_ocr is not None:
+                try:
+                    e_results = easy_ocr.readtext(str_path)
+                    for bbox_poly, text, score in e_results:
+                        polygon_points = [[int(p[0]), int(p[1])] for p in bbox_poly] if bbox_poly else []
+                        if polygon_points:
+                            xs = [p[0] for p in polygon_points]
+                            ys = [p[1] for p in polygon_points]
+                            bbox = [min(xs), min(ys), max(xs), max(ys)]
+                        else:
+                            bbox = [0, 0, 0, 0]
+
+                        ocr_results.append(
+                            OCRResult(
+                                text=str(text).strip(),
+                                confidence=max(0.0, min(1.0, float(score))),
+                                bbox=bbox,
+                                polygon=polygon_points,
+                                source="easyocr",
+                                page=page,
+                                image_path=str_path
+                            )
+                        )
+                except Exception as e:
+                    logger.warning(f"EasyOCR extraction warning: {e}")
+
+        # 4. Quaternary Engine: PyTesseract Fallback
+        if not ocr_results and HAS_PYTESSERACT:
+            try:
+                img_pil = Image.open(str_path)
+                text_data = pytesseract.image_to_data(img_pil, output_type=pytesseract.Output.DICT)
+                n_boxes = len(text_data.get('text', []))
+                for i in range(n_boxes):
+                    txt = text_data['text'][i].strip()
+                    conf = float(text_data['conf'][i])
+                    if txt and conf > 0:
+                        x, y, w, h = text_data['left'][i], text_data['top'][i], text_data['width'][i], text_data['height'][i]
+                        ocr_results.append(
+                            OCRResult(
+                                text=txt,
+                                confidence=min(1.0, conf / 100.0),
+                                bbox=[x, y, x + w, y + h],
+                                polygon=[[x, y], [x + w, y], [x + w, y + h], [x, y + h]],
+                                source="tesseract",
+                                page=page,
+                                image_path=str_path
+                            )
+                        )
+            except Exception as e:
+                logger.warning(f"PyTesseract extraction warning: {e}")
 
         return ocr_results
