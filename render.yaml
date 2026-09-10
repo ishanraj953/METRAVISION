@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: metravision-backend-ai
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --app-dir backend --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: JWT_SECRET_KEY
+        value: metrax-super-secret-jwt-key-2026-hackathon-spec
