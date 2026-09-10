@@ -93,24 +93,31 @@ class AIService:
                             )
                             decl_dict[field_name] = decl_field
 
-                    # Create aliases for consistent frontend/backend mapping
-                    if "manufacturer" in decl_dict and "manufacturer_name" not in decl_dict:
-                        decl_dict["manufacturer_name"] = decl_dict["manufacturer"]
-                    if "manufacturer_name" in decl_dict and "manufacturer" not in decl_dict:
-                        decl_dict["manufacturer"] = decl_dict["manufacturer_name"]
-
-                    if "importer" in decl_dict and "importer_name" not in decl_dict:
-                        decl_dict["importer_name"] = decl_dict["importer"]
-                    if "importer_name" in decl_dict and "importer" not in decl_dict:
-                        decl_dict["importer"] = decl_dict["importer_name"]
-
-                    if "manufacturing_date" in decl_dict and "mfg_date" not in decl_dict:
-                        decl_dict["mfg_date"] = decl_dict["manufacturing_date"]
-                    if "mfg_date" in decl_dict and "manufacturing_date" not in decl_dict:
-                        decl_dict["manufacturing_date"] = decl_dict["mfg_date"]
+                    # Create aliases for consistent frontend/backend mapping across all 12 mandatory declarations
+                    alias_pairs = [
+                        ("manufacturer", "manufacturer_name"),
+                        ("importer", "importer_name"),
+                        ("manufacturing_date", "mfg_date"),
+                        ("expiry_date", "best_before"),
+                        ("batch_number", "batch_no"),
+                        ("consumer_care", "customer_care"),
+                        ("unit_sale_price", "usp"),
+                        ("product_name", "commodity_name"),
+                        ("brand", "brand_name")
+                    ]
+                    for k1, k2 in alias_pairs:
+                        if k1 in decl_dict and k2 not in decl_dict:
+                            decl_dict[k2] = decl_dict[k1]
+                        elif k2 in decl_dict and k1 not in decl_dict:
+                            decl_dict[k1] = decl_dict[k2]
 
                     # Ensure standard mandatory fields exist
-                    for std_field in ["mrp", "net_quantity", "country_of_origin", "manufacturer", "manufacturer_name", "importer", "importer_name", "consumer_care"]:
+                    mandatory_fields = [
+                        "mrp", "net_quantity", "country_of_origin", "manufacturer", "manufacturer_name", 
+                        "importer", "importer_name", "consumer_care", "unit_sale_price", "batch_number", 
+                        "manufacturing_date", "mfg_date", "expiry_date", "product_name", "brand"
+                    ]
+                    for std_field in mandatory_fields:
                         if std_field not in decl_dict or not decl_dict[std_field].is_present:
                             if std_field not in decl_dict:
                                 decl_dict[std_field] = DeclarationField(value=None, confidence=0.0, is_present=False)

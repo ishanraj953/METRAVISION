@@ -87,12 +87,13 @@ def format_case_response(case: Case) -> dict:
 
 @router.get("/dashboard/kpi", response_model=DashboardKPIResponse)
 def get_dashboard_kpis(
-    officer_id: Optional[int] = None,
-    my_cases_only: Optional[bool] = None,
+    officer_id: Optional[str] = Query(None),
+    my_cases_only: Optional[bool] = Query(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    target_officer_id = officer_id
+    parsed_officer_id = int(officer_id) if officer_id and str(officer_id).isdigit() else None
+    target_officer_id = parsed_officer_id
     target_officer_name = None
 
     # Inspectors (CHECKER) only see KPIs for cases handled by them
@@ -115,8 +116,8 @@ def list_cases(
     status: Optional[str] = None,
     severity: Optional[str] = None,
     entity_id: Optional[int] = None,
-    officer_id: Optional[int] = None,
-    my_cases_only: Optional[bool] = None,
+    officer_id: Optional[str] = Query(None),
+    my_cases_only: Optional[bool] = Query(None),
     search: Optional[str] = None,
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
@@ -125,6 +126,8 @@ def list_cases(
 ):
     from sqlalchemy import or_
     query = db.query(Case)
+
+    parsed_officer_id = int(officer_id) if officer_id and str(officer_id).isdigit() else None
 
     # Scoping cases: If user is an inspector (CHECKER) or requested my_cases_only,
     # strictly restrict to cases handled by this officer
@@ -142,8 +145,8 @@ def list_cases(
                 Case.officer_name.ilike(f"%{current_user.full_name}%")
             )
         )
-    elif officer_id is not None:
-        query = query.filter(Case.officer_id == officer_id)
+    elif parsed_officer_id is not None:
+        query = query.filter(Case.officer_id == parsed_officer_id)
 
     if status:
         query = query.filter(Case.status == status)

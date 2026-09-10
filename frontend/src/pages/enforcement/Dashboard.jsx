@@ -33,12 +33,13 @@ const EnforcementDashboard = () => {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
+      const officerParam = user?.id ? `&officer_id=${user.id}` : "";
       const kpiUrl = isInspector
-        ? `/cases/dashboard/kpi?my_cases_only=true&officer_id=${user?.id || ''}`
+        ? `/cases/dashboard/kpi?my_cases_only=true${officerParam}`
         : `/cases/dashboard/kpi`;
 
       const casesUrl = isInspector
-        ? `/cases?limit=5&my_cases_only=true&officer_id=${user?.id || ''}`
+        ? `/cases?limit=5&my_cases_only=true${officerParam}`
         : `/cases?limit=5`;
 
       const [kpiRes, casesRes, partiesRes] = await Promise.all([
