@@ -5,6 +5,9 @@ from pathlib import Path
 from typing import List
 from PIL import Image
 
+os.environ["FLAGS_use_mkldnn"] = "0"
+os.environ["FLAGS_enable_pir_api"] = "0"
+
 from .ocr_result import OCRResult
 
 logger = logging.getLogger("metravision.ocr")
@@ -197,6 +200,7 @@ class OCREngine:
                             page=page,
                             image_path=str_path
                         )
+                    )
         # 3. Tertiary Engine: EasyOCR Cross-Platform Fallback (Linux / Render cloud fallback)
         if not ocr_results:
             easy_ocr = self._get_easy_ocr()
