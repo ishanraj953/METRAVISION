@@ -1,6 +1,12 @@
 import json
+import os
+
 def load_rules():
-    with open("rules/rules.json", "r") as file:
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    target_path = os.path.join(base_dir, "rules", "rules.json")
+    if not os.path.exists(target_path):
+        target_path = "rules/rules.json"
+    with open(target_path, "r", encoding="utf-8") as file:
         rules = json.load(file)
     return rules
 

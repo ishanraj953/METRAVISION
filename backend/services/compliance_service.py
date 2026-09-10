@@ -15,6 +15,7 @@ from services.ai_service import ai_service
 from services.rule_service import rule_service
 from services.evidence_service import evidence_service
 from services.risk_service import risk_service
+from services.intelligence_service import intelligence_service
 from utils.image_processing import save_and_process_image
 
 
@@ -259,6 +260,12 @@ class ComplianceService:
             scan_id=scan.id,
             violations=eval_res["violations"]
         )
+
+        # 8b. Intelligence Engine Orchestration
+        try:
+            intel_report = intelligence_service.analyze_scan_intelligence(db=db, scan_id=scan.id)
+        except Exception as e:
+            intel_report = {"error": str(e)}
 
         # 9. Update Scan & Product Status
         scan.status = eval_res["status"]

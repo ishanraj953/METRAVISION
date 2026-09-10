@@ -19,13 +19,19 @@ from schemas.case import (
     CaseCloseRequest,
     DashboardKPIResponse
 )
+from pydantic import BaseModel
 from auth.dependencies import get_current_user
 from services.case_service import CaseService
 from services.responsibility_service import ResponsibilityEngine
 from services.email_service import EmailService
 from services.report_service import ReportService
+from services.intelligence_service import intelligence_service
 
 router = APIRouter(prefix="/cases", tags=["Enforcement Case Management"])
+
+class OfficerOverrideRequest(BaseModel):
+    override_decision: str
+    reason: str
 
 def format_case_response(case: Case) -> dict:
     prod_name = case.product.name if case.product else "Pre-Packaged Commodity"
@@ -541,3 +547,29 @@ def download_case_statutory_pdf(
             "Content-Disposition": f'attachment; filename="Statutory_Enforcement_Memo_{case.case_number}.pdf"'
         }
     )
+
+@router.post("/{case_id}/override")
+def apply_case_officer_override(
+    case_id: int,
+    payload: OfficerOverrideRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Apply Legal Metrology Officer override to system decision on enforcement case.
+    Logs audit trail event using engine.audit_trail and engine.officer_override.
+    """
+    try:
+        res = intelligence_service.record_officer_override(
+            db=db,
+            case_id=case_id,
+            officer_id=current_user.id,
+            officer_email=current_user.email,
+            override_decision=payload.override_decision,
+            reason=payload.reason
+        )
+        return {"success": True, "detail": "Officer override recorded", "data": res}
+    except ValueError as ve:
+        raise HTTPException(status_code=404, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

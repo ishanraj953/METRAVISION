@@ -13,6 +13,7 @@ from api.stats import router as stats_router
 from api.cases import router as cases_router
 from api.responsible_parties import router as responsible_parties_router
 from api.notifications import router as notifications_router
+from api.intelligence import router as intelligence_router
 
 __all__ = [
     "auth_router",
@@ -29,5 +30,6 @@ __all__ = [
     "stats_router",
     "cases_router",
     "responsible_parties_router",
-    "notifications_router"
+    "notifications_router",
+    "intelligence_router"
 ]

@@ -40,8 +40,12 @@ def calculate_risk_score(
     4. Repeat violation
     """
 
-    # Load severity scores from Rule Engine
-    with open("rules/severity.json", "r") as file:
+    import os
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    target_path = os.path.join(base_dir, "rules", "severity.json")
+    if not os.path.exists(target_path):
+        target_path = "rules/severity.json"
+    with open(target_path, "r", encoding="utf-8") as file:
         severity_data = json.load(file)
 
     # -----------------------------

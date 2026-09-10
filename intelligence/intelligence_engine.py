@@ -1,15 +1,23 @@
-from risk_engine import calculate_risk_score
-from priority_engine import calculate_priority_score
-from recommendation_engine import (
-    generate_recommendation,
-    generate_explanation
-)
-from evidence_engine import create_evidence_chain
-from evidence_engine import validate_evidence
-from decision_engine import make_decision
-from officer_recommendation import (
-    generate_officer_recommendation
-)
+try:
+    from intelligence.risk_engine import calculate_risk_score
+    from intelligence.priority_engine import calculate_priority_score
+    from intelligence.recommendation_engine import (
+        generate_recommendation,
+        generate_explanation
+    )
+    from intelligence.evidence_engine import create_evidence_chain, validate_evidence
+    from intelligence.decision_engine import make_decision
+    from intelligence.officer_recommendation import generate_officer_recommendation
+except ImportError:
+    from risk_engine import calculate_risk_score
+    from priority_engine import calculate_priority_score
+    from recommendation_engine import (
+        generate_recommendation,
+        generate_explanation
+    )
+    from evidence_engine import create_evidence_chain, validate_evidence
+    from decision_engine import make_decision
+    from officer_recommendation import generate_officer_recommendation
 
 
 def analyze_product(
