@@ -1,7 +1,6 @@
 import axios from "axios";
 
-// Legal Metrology Backend API Gateway (Explicit 127.0.0.1 to prevent Windows IPv6 [::1] timeout)
-export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+export const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "" : "http://127.0.0.1:8000");
 
 const API = axios.create({
   baseURL: API_BASE_URL,

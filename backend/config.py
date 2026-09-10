@@ -6,18 +6,24 @@ class Settings(BaseSettings):
     API_V1_STR: str = ""
     
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./metrax.db")
-    MONGODB_URL: str = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
-    MONGODB_DB_NAME: str = os.getenv("MONGODB_DB_NAME", "metravision")
+    MONGODB_URL: str = os.getenv("MONGODB_URI", os.getenv("MONGODB_URL", "mongodb://localhost:27017"))
+    MONGODB_DB_NAME: str = os.getenv("DATABASE_NAME", os.getenv("MONGODB_DB_NAME", "ai_constituency"))
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "postgres")
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "metrax_db")
     POSTGRES_HOST: str = os.getenv("POSTGRES_HOST", "localhost")
     POSTGRES_PORT: str = os.getenv("POSTGRES_PORT", "5432")
-    
+
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    CLOUDINARY_CLOUD_NAME: str = os.getenv("CLOUDINARY_CLOUD_NAME", os.getenv("CLOUD_NAME", ""))
+    CLOUDINARY_API_KEY: str = os.getenv("CLOUDINARY_API_KEY", "")
+    CLOUDINARY_API_SECRET: str = os.getenv("CLOUDINARY_API_SECRET", "")
+
     JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "metrax-super-secret-jwt-key-2026-hackathon-spec")
     JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
     JWT_EXPIRE_MINUTES: int = int(os.getenv("JWT_EXPIRE_MINUTES", "1440"))
-    
+
     AI_SERVICE_URL: str = os.getenv("AI_SERVICE_URL", "http://localhost:8000/mock-ai")
     RULE_ENGINE_URL: str = os.getenv("RULE_ENGINE_URL", "http://localhost:8000/mock-rules")
     
