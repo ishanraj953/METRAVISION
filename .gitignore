@@ -18,10 +18,18 @@ __pycache__/
 *$py.class
 *.so
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .coverage
 htmlcov/
 .nox/
 .hypothesis/
+
+# Tests & Test Fixtures
+backend/tests/
+ai-service/test/
+ai-service/test_images/
+**/test_*.py
 
 # Local SQLite Databases
 *.db
@@ -39,6 +47,8 @@ backend/storage/
 backend/output/
 ai-service/output/
 ai-service/processed/
+ai-service/preprocessing/input/
+ai-service/preprocessing/output/
 processed/
 outputs/
 logs/
