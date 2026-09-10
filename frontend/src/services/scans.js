@@ -88,7 +88,7 @@ export const scanService = {
   },
 
   getInspectionHistory: async () => {
-    const response = await API.get("/inspections/");
+    const response = await API.get("/inspections");
     return response.data;
   },
 

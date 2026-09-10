@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
-const API_BASE = "http://127.0.0.1:8000";
+import API, { API_BASE_URL } from "../../services/api";
 
 const CaseDetail = () => {
   const { id } = useParams();
@@ -48,9 +48,7 @@ const CaseDetail = () => {
   const fetchCaseDetail = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("metrax_token") || localStorage.getItem("token");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await axios.get(`${API_BASE}/cases/${id}`, { headers });
+      const res = await API.get(`/cases/${id}`);
       if (res.data) {
         setCaseData(res.data);
         setConfirmedRole(res.data.entity_type || "MANUFACTURER");
@@ -73,15 +71,13 @@ const CaseDetail = () => {
   const handleConfirmResponsibility = async () => {
     setActionProcessing(true);
     try {
-      const token = localStorage.getItem("metrax_token") || localStorage.getItem("token");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      await axios.post(`${API_BASE}/cases/${id}/confirm-responsibility`, {
+      await API.post(`/cases/${id}/confirm-responsibility`, {
         responsible_party_id: caseData.responsible_party_id,
         entity_name: confirmedEntityName,
         entity_type: confirmedRole,
         statutory_section: statutorySection,
         remarks: officerNotes
-      }, { headers });
+      });
       
       setActionSuccessMsg("Officer confirmation recorded successfully.");
       setActiveModal(null);
@@ -96,15 +92,13 @@ const CaseDetail = () => {
   const handleIssueNotice = async () => {
     setActionProcessing(true);
     try {
-      const token = localStorage.getItem("metrax_token") || localStorage.getItem("token");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      await axios.post(`${API_BASE}/cases/${id}/issue-notice`, {
+      await API.post(`/cases/${id}/issue-notice`, {
         deadline_days: Number(noticeDeadlineDays),
         notice_type: noticeType,
         notice_remarks: officerNotes,
         recipient_email: recipientEmail,
         send_email: true
-      }, { headers });
+      });
       
       setActionSuccessMsg("Show Cause Notice issued and statutory communication dispatched.");
       setActiveModal(null);
@@ -119,14 +113,12 @@ const CaseDetail = () => {
   const handleImposePenalty = async () => {
     setActionProcessing(true);
     try {
-      const token = localStorage.getItem("metrax_token") || localStorage.getItem("token");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      await axios.post(`${API_BASE}/cases/${id}/impose-penalty`, {
+      await API.post(`/cases/${id}/impose-penalty`, {
         penalty_amount: Number(penaltyAmount),
         statutory_section: statutorySection,
         penalty_remarks: officerNotes,
         send_email: true
-      }, { headers });
+      });
       
       setActionSuccessMsg("Compounding Penalty recorded under Legal Metrology Act.");
       setActiveModal(null);
@@ -141,13 +133,11 @@ const CaseDetail = () => {
   const handleCloseCase = async () => {
     setActionProcessing(true);
     try {
-      const token = localStorage.getItem("metrax_token") || localStorage.getItem("token");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      await axios.post(`${API_BASE}/cases/${id}/close`, {
+      await API.post(`/cases/${id}/close`, {
         resolution_type: resolutionType,
         amount_collected: Number(collectedAmount),
         closing_remarks: officerNotes
-      }, { headers });
+      });
       
       setActionSuccessMsg("Case resolution finalized.");
       setActiveModal(null);
@@ -160,8 +150,8 @@ const CaseDetail = () => {
   };
 
   const downloadPDF = () => {
-    const token = localStorage.getItem("metrax_token") || localStorage.getItem("token");
-    window.open(`${API_BASE}/cases/${id}/pdf?token=${token}`, "_blank");
+    const token = localStorage.getItem("token") || localStorage.getItem("gov_token") || localStorage.getItem("metrax_token");
+    window.open(`${API_BASE_URL}/cases/${id}/pdf?token=${token}`, "_blank");
   };
 
   if (loading) {

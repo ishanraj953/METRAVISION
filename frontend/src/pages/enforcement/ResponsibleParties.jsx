@@ -13,7 +13,7 @@ import {
   RefreshCw
 } from "lucide-react";
 
-const API_BASE = "http://127.0.0.1:8000";
+import API from "../../services/api";
 
 const ResponsibleParties = () => {
   const navigate = useNavigate();
@@ -26,16 +26,13 @@ const ResponsibleParties = () => {
   const fetchParties = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("metrax_token") || localStorage.getItem("token");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-      let url = `${API_BASE}/responsible-parties?limit=50`;
+      let url = `/responsible-parties?limit=50`;
       if (activeTab !== "ALL") url += `&entity_type=${activeTab}`;
       if (search) url += `&search=${encodeURIComponent(search)}`;
 
       const [pRes, sRes] = await Promise.all([
-        axios.get(url, { headers }),
-        axios.get(`${API_BASE}/responsible-parties/stats`, { headers }).catch(() => null)
+        API.get(url),
+        API.get(`/responsible-parties/stats`).catch(() => null)
       ]);
 
       if (pRes.data) setParties(pRes.data.items || []);

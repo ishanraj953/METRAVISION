@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
-const API_BASE = "http://127.0.0.1:8000";
+import API from "../../services/api";
 
 const EnforcementDashboard = () => {
   const { user } = useAuth();
@@ -33,21 +33,18 @@ const EnforcementDashboard = () => {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("metrax_token") || localStorage.getItem("token");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
       const kpiUrl = isInspector
-        ? `${API_BASE}/cases/dashboard/kpi?my_cases_only=true&officer_id=${user?.id || ''}`
-        : `${API_BASE}/cases/dashboard/kpi`;
+        ? `/cases/dashboard/kpi?my_cases_only=true&officer_id=${user?.id || ''}`
+        : `/cases/dashboard/kpi`;
 
       const casesUrl = isInspector
-        ? `${API_BASE}/cases?limit=5&my_cases_only=true&officer_id=${user?.id || ''}`
-        : `${API_BASE}/cases?limit=5`;
+        ? `/cases?limit=5&my_cases_only=true&officer_id=${user?.id || ''}`
+        : `/cases?limit=5`;
 
       const [kpiRes, casesRes, partiesRes] = await Promise.all([
-        axios.get(kpiUrl, { headers }).catch(() => null),
-        axios.get(casesUrl, { headers }).catch(() => null),
-        axios.get(`${API_BASE}/responsible-parties?limit=5`, { headers }).catch(() => null)
+        API.get(kpiUrl).catch(() => null),
+        API.get(casesUrl).catch(() => null),
+        API.get(`/responsible-parties?limit=5`).catch(() => null)
       ]);
 
       if (kpiRes && kpiRes.data) setKpis(kpiRes.data);

@@ -14,7 +14,7 @@ import {
   AlertTriangle
 } from "lucide-react";
 
-const API_BASE = "http://127.0.0.1:8000";
+import API from "../../services/api";
 
 const EntityProfile = () => {
   const { id } = useParams();
@@ -26,9 +26,7 @@ const EntityProfile = () => {
     const fetchProfile = async () => {
       setLoading(true);
       try {
-        const token = localStorage.getItem("metrax_token") || localStorage.getItem("token");
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await axios.get(`${API_BASE}/responsible-parties/${id}`, { headers });
+        const res = await API.get(`/responsible-parties/${id}`);
         if (res.data) setParty(res.data);
       } catch (err) {
         console.error("Entity profile fetch error:", err);
