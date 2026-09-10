@@ -1,6 +1,10 @@
 import axios from "axios";
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "" : "http://127.0.0.1:8000");
+let rawBaseUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "" : "http://127.0.0.1:8000");
+if (rawBaseUrl && rawBaseUrl.endsWith("/")) {
+  rawBaseUrl = rawBaseUrl.slice(0, -1);
+}
+export const API_BASE_URL = rawBaseUrl;
 
 const API = axios.create({
   baseURL: API_BASE_URL,
