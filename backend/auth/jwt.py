@@ -1,4 +1,7 @@
-import jwt
+try:
+    import jwt
+except ImportError:
+    from jose import jwt
 import hashlib
 import hmac
 import datetime
