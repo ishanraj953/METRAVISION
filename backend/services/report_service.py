@@ -1,3 +1,4 @@
+import logging
 import os
 import json
 import datetime
@@ -11,7 +12,39 @@ from models.declaration import Declaration
 from models.inspection import Inspection
 from config import settings
 
+logger = logging.getLogger(__name__)
+
 class ReportService:
+    @staticmethod
+    def upload_pdf_to_cloudinary(pdf_bytes: bytes, filename: str) -> str:
+        """
+        Uploads generated PDF report to Cloudinary cloud storage and returns secure HTTPS URL.
+        """
+        if not settings.CLOUDINARY_CLOUD_NAME or not settings.CLOUDINARY_API_KEY:
+            logger.info("Cloudinary credentials not configured; using local storage/streaming.")
+            return None
+
+        try:
+            import cloudinary
+            import cloudinary.uploader
+            cloudinary.config(
+                cloud_name=settings.CLOUDINARY_CLOUD_NAME,
+                api_key=settings.CLOUDINARY_API_KEY,
+                api_secret=settings.CLOUDINARY_API_SECRET,
+                secure=True
+            )
+            res = cloudinary.uploader.upload(
+                pdf_bytes,
+                resource_type="raw",
+                public_id=f"metravision_memos/{filename}.pdf",
+                overwrite=True
+            )
+            url = res.get("secure_url") or res.get("url")
+            logger.info(f"Successfully uploaded PDF report to Cloudinary: {url}")
+            return url
+        except Exception as e:
+            logger.warning(f"Cloudinary PDF upload warning: {e}")
+            return None
     def generate_report(
         self,
         db: Session,
