@@ -39,7 +39,8 @@ class AIService:
         self,
         image_bytes: bytes,
         category_hint: Optional[str] = None,
-        product_name_hint: Optional[str] = None
+        product_name_hint: Optional[str] = None,
+        save_annotated_to: Optional[str] = None
     ) -> AIScanResult:
         """
         AI Service Abstraction connecting backend to the complete multi-phase METRAVision AI pipeline.
@@ -72,26 +73,47 @@ class AIService:
                     ocr_items = res.get("ocr", {}).get("results", [])
                     raw_ocr = " | ".join([item.get("text", "") for item in ocr_items if item.get("text")])
 
-                    # Build declaration fields map
+                    # Build declaration fields map (support both nested fields key and flat declarations dict)
                     decl_dict = {}
-                    extracted_fields = res.get("declarations", {}).get("fields", {})
+                    raw_declarations = res.get("declarations", {})
+                    extracted_fields = raw_declarations.get("fields", raw_declarations) if isinstance(raw_declarations, dict) else {}
                     for field_name, f_info in extracted_fields.items():
+                        if field_name in ["fields", "candidates", "detected_field_count", "total_candidates"]:
+                            continue
                         if f_info and isinstance(f_info, dict):
                             val = f_info.get("value")
                             conf = float(f_info.get("confidence", 0.90))
                             bbox = f_info.get("bbox", [100, 200, 300, 240])
-                            is_pres = val is not None and val != "" and val != "MISSING"
-                            decl_dict[field_name] = DeclarationField(
+                            is_pres = val is not None and val != "" and str(val).upper() not in ["MISSING", "NONE"]
+                            decl_field = DeclarationField(
                                 value=val,
                                 confidence=conf,
                                 bbox=bbox,
                                 is_present=is_pres
                             )
+                            decl_dict[field_name] = decl_field
+
+                    # Create aliases for consistent frontend/backend mapping
+                    if "manufacturer" in decl_dict and "manufacturer_name" not in decl_dict:
+                        decl_dict["manufacturer_name"] = decl_dict["manufacturer"]
+                    if "manufacturer_name" in decl_dict and "manufacturer" not in decl_dict:
+                        decl_dict["manufacturer"] = decl_dict["manufacturer_name"]
+
+                    if "importer" in decl_dict and "importer_name" not in decl_dict:
+                        decl_dict["importer_name"] = decl_dict["importer"]
+                    if "importer_name" in decl_dict and "importer" not in decl_dict:
+                        decl_dict["importer"] = decl_dict["importer_name"]
+
+                    if "manufacturing_date" in decl_dict and "mfg_date" not in decl_dict:
+                        decl_dict["mfg_date"] = decl_dict["manufacturing_date"]
+                    if "mfg_date" in decl_dict and "manufacturing_date" not in decl_dict:
+                        decl_dict["manufacturing_date"] = decl_dict["mfg_date"]
 
                     # Ensure standard mandatory fields exist
-                    for std_field in ["mrp", "net_quantity", "country_of_origin", "manufacturer_name", "importer_name", "consumer_care"]:
-                        if std_field not in decl_dict:
-                            decl_dict[std_field] = DeclarationField(value=None, confidence=0.0, is_present=False)
+                    for std_field in ["mrp", "net_quantity", "country_of_origin", "manufacturer", "manufacturer_name", "importer", "importer_name", "consumer_care"]:
+                        if std_field not in decl_dict or not decl_dict[std_field].is_present:
+                            if std_field not in decl_dict:
+                                decl_dict[std_field] = DeclarationField(value=None, confidence=0.0, is_present=False)
 
                     return AIScanResult(
                         product_type=category,

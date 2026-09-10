@@ -4,6 +4,7 @@ import json
 import os
 from typing import Optional
 from sqlalchemy.orm import Session
+from models.user import User
 from models.product import Product, ProductImage
 from models.scan import Scan
 from models.declaration import Declaration
@@ -150,10 +151,12 @@ class ComplianceService:
             product.mrp = str(dict_declarations["mrp"]["value"])
         if dict_declarations.get("net_quantity", {}).get("value"):
             product.net_quantity = str(dict_declarations["net_quantity"]["value"])
-        if dict_declarations.get("manufacturer_name", {}).get("value"):
-            product.manufacturer_name = str(dict_declarations["manufacturer_name"]["value"])
-        if dict_declarations.get("importer_name", {}).get("value"):
-            product.importer_name = str(dict_declarations["importer_name"]["value"])
+        mfg_val = dict_declarations.get("manufacturer_name", {}).get("value") or dict_declarations.get("manufacturer", {}).get("value")
+        if mfg_val:
+            product.manufacturer_name = str(mfg_val)
+        imp_val = dict_declarations.get("importer_name", {}).get("value") or dict_declarations.get("importer", {}).get("value")
+        if imp_val:
+            product.importer_name = str(imp_val)
         if dict_declarations.get("consumer_care", {}).get("value"):
             product.consumer_care = str(dict_declarations["consumer_care"]["value"])
         if dict_declarations.get("country_of_origin", {}).get("value"):
@@ -589,10 +592,12 @@ class ComplianceService:
             product.mrp = str(merged_declarations["mrp"]["value"])
         if merged_declarations.get("net_quantity", {}).get("value"):
             product.net_quantity = str(merged_declarations["net_quantity"]["value"])
-        if merged_declarations.get("manufacturer_name", {}).get("value"):
-            product.manufacturer_name = str(merged_declarations["manufacturer_name"]["value"])
-        if merged_declarations.get("importer_name", {}).get("value"):
-            product.importer_name = str(merged_declarations["importer_name"]["value"])
+        mfg_val = merged_declarations.get("manufacturer_name", {}).get("value") or merged_declarations.get("manufacturer", {}).get("value")
+        if mfg_val:
+            product.manufacturer_name = str(mfg_val)
+        imp_val = merged_declarations.get("importer_name", {}).get("value") or merged_declarations.get("importer", {}).get("value")
+        if imp_val:
+            product.importer_name = str(imp_val)
         if merged_declarations.get("consumer_care", {}).get("value"):
             product.consumer_care = str(merged_declarations["consumer_care"]["value"])
         if merged_declarations.get("country_of_origin", {}).get("value"):

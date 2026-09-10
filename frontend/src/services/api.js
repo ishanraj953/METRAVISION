@@ -17,7 +17,7 @@ const API = axios.create({
 // Request Interceptor: Automatically attach Bearer token and handle FormData
 API.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token") || localStorage.getItem("gov_token") || localStorage.getItem("metrax_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
