@@ -13,6 +13,12 @@ from .ocr_result import OCRResult
 logger = logging.getLogger("metravision.ocr")
 
 try:
+    import easyocr
+    HAS_EASYOCR = True
+except Exception as e:
+    HAS_EASYOCR = False
+
+try:
     import winocr
     HAS_WINOCR = True
 except Exception:
@@ -30,12 +36,6 @@ try:
     HAS_PADDLEOCR = True
 except Exception:
     HAS_PADDLEOCR = False
-
-try:
-    import easyocr
-    HAS_EASYOCR = True
-except Exception:
-    HAS_EASYOCR = False
 
 try:
     import pytesseract
@@ -69,23 +69,16 @@ class OCREngine:
         return self._paddle_ocr
 
     def _get_easy_ocr(self):
+        print(f"DEBUG: HAS_EASYOCR = {HAS_EASYOCR}")
         if self._easy_ocr is None and HAS_EASYOCR:
             try:
-                self._easy_ocr = easyocr.Reader([self.lang], gpu=False)
+                self._easy_ocr = easyocr.Reader([self.lang], gpu=False, verbose=False)
             except Exception as e:
+                print(f"DEBUG: Could not initialize EasyOCR: {e}")
                 logger.warning(f"Could not initialize EasyOCR: {e}")
         return self._easy_ocr
 
-    def extract_text(self, image_path: str, page: int = 1) -> List[OCRResult]:
-
-        image = Path(image_path)
-
-        if not image.exists():
-            raise FileNotFoundError(
-                f"Image not found: {image_path}"
-            )
-
-        str_path = str(image)
+    def _extract_single_image(self, str_path: str, page: int = 1) -> List[OCRResult]:
         ocr_results: List[OCRResult] = []
 
         # 1. Primary Engine: Isolated Native Windows Media OCR (Process-safe, COM-isolated, 0.7s runtime)
@@ -99,11 +92,14 @@ class OCREngine:
                 if proc.returncode == 0 and proc.stdout.strip():
                     items = json.loads(proc.stdout)
                     for item in items:
+                        txt = str(item.get("text", "")).strip()
+                        if not txt:
+                            continue
                         bbox = item.get("bbox", [0, 0, 0, 0])
                         polygon = [[bbox[0], bbox[1]], [bbox[2], bbox[1]], [bbox[2], bbox[3]], [bbox[0], bbox[3]]]
                         ocr_results.append(
                             OCRResult(
-                                text=str(item.get("text", "")).strip(),
+                                text=txt,
                                 confidence=float(item.get("confidence", 0.95)),
                                 bbox=bbox,
                                 polygon=polygon,
@@ -112,102 +108,103 @@ class OCREngine:
                                 image_path=str_path
                             )
                         )
-                    if ocr_results:
-                        return ocr_results
             except Exception as e:
-                logger.warning(f"Native Windows OCR runner error: {e}, falling back to PaddleOCR")
+                logger.warning(f"Native Windows OCR runner error: {e}")
 
         # 2. Secondary Engine: PaddleOCR (Deep learning fallback)
-        paddle_instance = self._get_paddle_ocr()
-        if paddle_instance is not None:
-            try:
-                results = list(paddle_instance.predict(str_path))
-            except Exception:
+        if len(ocr_results) < 15:
+            paddle_instance = self._get_paddle_ocr()
+            if paddle_instance is not None:
                 try:
-                    results = paddle_instance.ocr(str_path)
+                    results = list(paddle_instance.predict(str_path))
                 except Exception:
-                    results = []
-        else:
-            results = []
+                    try:
+                        results = paddle_instance.ocr(str_path)
+                    except Exception:
+                        results = []
 
-        for result in results:
-            if isinstance(result, dict):
-                texts = result.get("rec_texts", [])
-                scores = result.get("rec_scores", [])
-                boxes = result.get("rec_boxes", [])
-                polygons = result.get("rec_polys", [])
+                for result in results:
+                    if isinstance(result, dict):
+                        texts = result.get("rec_texts", [])
+                        scores = result.get("rec_scores", [])
+                        boxes = result.get("rec_boxes", [])
+                        polygons = result.get("rec_polys", [])
 
-                for idx, text in enumerate(texts):
-                    score = float(scores[idx]) if idx < len(scores) else 1.0
-                    box = boxes[idx] if idx < len(boxes) else None
-                    poly = polygons[idx] if idx < len(polygons) else None
+                        for idx, text in enumerate(texts):
+                            txt = str(text).strip()
+                            if not txt:
+                                continue
+                            score = float(scores[idx]) if idx < len(scores) else 1.0
+                            box = boxes[idx] if idx < len(boxes) else None
+                            poly = polygons[idx] if idx < len(polygons) else None
 
-                    polygon_points = []
-                    if poly is not None:
-                        polygon_points = [
-                            [int(p[0]), int(p[1])] for p in poly
-                        ]
+                            polygon_points = []
+                            if poly is not None:
+                                polygon_points = [[int(p[0]), int(p[1])] for p in poly]
 
-                    if box is not None and len(box) >= 4:
-                        bbox = [int(box[0]), int(box[1]), int(box[2]), int(box[3])]
-                    elif polygon_points:
-                        xs = [p[0] for p in polygon_points]
-                        ys = [p[1] for p in polygon_points]
-                        bbox = [min(xs), min(ys), max(xs), max(ys)]
-                    else:
-                        bbox = [0, 0, 0, 0]
+                            if box is not None and len(box) >= 4:
+                                bbox = [int(box[0]), int(box[1]), int(box[2]), int(box[3])]
+                            elif polygon_points:
+                                xs = [p[0] for p in polygon_points]
+                                ys = [p[1] for p in polygon_points]
+                                bbox = [min(xs), min(ys), max(xs), max(ys)]
+                            else:
+                                bbox = [0, 0, 0, 0]
 
-                    ocr_results.append(
-                        OCRResult(
-                            text=str(text).strip(),
-                            confidence=max(0.0, min(1.0, float(score))),
-                            bbox=bbox,
-                            polygon=polygon_points,
-                            source="ocr",
-                            page=page,
-                            image_path=str_path
-                        )
-                    )
+                            ocr_results.append(
+                                OCRResult(
+                                    text=txt,
+                                    confidence=max(0.0, min(1.0, float(score))),
+                                    bbox=bbox,
+                                    polygon=polygon_points,
+                                    source="paddleocr",
+                                    page=page,
+                                    image_path=str_path
+                                )
+                            )
 
-            elif isinstance(result, list):
-                # PaddleOCR 2.x standard output format: [[[points], (text, score)], ...]
-                for item in result:
-                    if not item or len(item) < 2:
-                        continue
-                    poly_points = item[0]
-                    text_score = item[1]
-                    text = text_score[0] if isinstance(text_score, (list, tuple)) else str(text_score)
-                    score = float(text_score[1]) if isinstance(text_score, (list, tuple)) and len(text_score) > 1 else 1.0
+                    elif isinstance(result, list):
+                        for item in result:
+                            if not item or len(item) < 2:
+                                continue
+                            poly_points = item[0]
+                            text_score = item[1]
+                            text = text_score[0] if isinstance(text_score, (list, tuple)) else str(text_score)
+                            txt = str(text).strip()
+                            if not txt:
+                                continue
+                            score = float(text_score[1]) if isinstance(text_score, (list, tuple)) and len(text_score) > 1 else 1.0
 
-                    polygon_points = [
-                        [int(p[0]), int(p[1])] for p in poly_points
-                    ] if poly_points else []
+                            polygon_points = [[int(p[0]), int(p[1])] for p in poly_points] if poly_points else []
+                            if polygon_points:
+                                xs = [p[0] for p in polygon_points]
+                                ys = [p[1] for p in polygon_points]
+                                bbox = [min(xs), min(ys), max(xs), max(ys)]
+                            else:
+                                bbox = [0, 0, 0, 0]
 
-                    if polygon_points:
-                        xs = [p[0] for p in polygon_points]
-                        ys = [p[1] for p in polygon_points]
-                        bbox = [min(xs), min(ys), max(xs), max(ys)]
-                    else:
-                        bbox = [0, 0, 0, 0]
+                            ocr_results.append(
+                                OCRResult(
+                                    text=txt,
+                                    confidence=max(0.0, min(1.0, float(score))),
+                                    bbox=bbox,
+                                    polygon=polygon_points,
+                                    source="paddleocr",
+                                    page=page,
+                                    image_path=str_path
+                                )
+                            )
 
-                    ocr_results.append(
-                        OCRResult(
-                            text=str(text).strip(),
-                            confidence=max(0.0, min(1.0, float(score))),
-                            bbox=bbox,
-                            polygon=polygon_points,
-                            source="ocr",
-                            page=page,
-                            image_path=str_path
-                        )
-                    )
-        # 3. Tertiary Engine: EasyOCR Cross-Platform Fallback (Linux / Render cloud fallback)
-        if not ocr_results:
+        # 3. Tertiary Engine: EasyOCR Cross-Platform Fallback
+        if len(ocr_results) < 15:
             easy_ocr = self._get_easy_ocr()
             if easy_ocr is not None:
                 try:
                     e_results = easy_ocr.readtext(str_path)
                     for bbox_poly, text, score in e_results:
+                        txt = str(text).strip()
+                        if not txt:
+                            continue
                         polygon_points = [[int(p[0]), int(p[1])] for p in bbox_poly] if bbox_poly else []
                         if polygon_points:
                             xs = [p[0] for p in polygon_points]
@@ -218,7 +215,7 @@ class OCREngine:
 
                         ocr_results.append(
                             OCRResult(
-                                text=str(text).strip(),
+                                text=txt,
                                 confidence=max(0.0, min(1.0, float(score))),
                                 bbox=bbox,
                                 polygon=polygon_points,
@@ -228,10 +225,11 @@ class OCREngine:
                             )
                         )
                 except Exception as e:
+                    print(f"EasyOCR extraction exception: {e}")
                     logger.warning(f"EasyOCR extraction warning: {e}")
 
         # 4. Quaternary Engine: PyTesseract Fallback
-        if not ocr_results and HAS_PYTESSERACT:
+        if len(ocr_results) < 5 and HAS_PYTESSERACT:
             try:
                 img_pil = Image.open(str_path)
                 text_data = pytesseract.image_to_data(img_pil, output_type=pytesseract.Output.DICT)
@@ -256,3 +254,40 @@ class OCREngine:
                 logger.warning(f"PyTesseract extraction warning: {e}")
 
         return ocr_results
+
+    def extract_text(self, image_path: str, page: int = 1) -> List[OCRResult]:
+        image = Path(image_path)
+
+        if not image.exists():
+            raise FileNotFoundError(f"Image not found: {image_path}")
+
+        str_path = str(image)
+        combined_results: List[OCRResult] = self._extract_single_image(str_path, page=page)
+        existing_texts = {r.text.strip().lower() for r in combined_results if r.text.strip()}
+
+        # If extracted text count is low or to catch vertical/sideways product text, run multi-angle rotation (90°, 180°, 270°)
+        if len(combined_results) < 12:
+            try:
+                img_pil = Image.open(str_path)
+                temp_dir = image.parent
+                for angle in [90, 180, 270]:
+                    rot_img = img_pil.rotate(angle, expand=True)
+                    rot_path = temp_dir / f"_temp_rot_{angle}_{image.name}"
+                    rot_img.save(rot_path)
+                    try:
+                        rot_results = self._extract_single_image(str(rot_path), page=page)
+                        for r in rot_results:
+                            clean_t = r.text.strip().lower()
+                            if len(clean_t) >= 2 and clean_t not in existing_texts:
+                                existing_texts.add(clean_t)
+                                combined_results.append(r)
+                    finally:
+                        if rot_path.exists():
+                            try:
+                                rot_path.unlink()
+                            except Exception:
+                                pass
+            except Exception as e:
+                logger.warning(f"Multi-angle auto-rotation extraction warning: {e}")
+
+        return combined_results
