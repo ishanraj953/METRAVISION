@@ -9,6 +9,10 @@ from api.risk import router as risk_router
 from api.listings import router as listings_router
 from api.reports import router as reports_router
 from api.admin import router as admin_router
+from api.stats import router as stats_router
+from api.cases import router as cases_router
+from api.responsible_parties import router as responsible_parties_router
+from api.notifications import router as notifications_router
 
 __all__ = [
     "auth_router",
@@ -21,5 +25,9 @@ __all__ = [
     "risk_router",
     "listings_router",
     "reports_router",
-    "admin_router"
+    "admin_router",
+    "stats_router",
+    "cases_router",
+    "responsible_parties_router",
+    "notifications_router"
 ]

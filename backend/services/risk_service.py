@@ -72,7 +72,7 @@ class RiskService:
             risk_level=risk_level,
             inspection_priority=priority,
             repeat_offender=repeat_offender,
-            factors=json.dumps(factors)
+            factors=json.dumps(factors, default=str)
         )
         db.add(risk_entry)
         db.commit()

@@ -1,17 +1,28 @@
-from services.ai_service import ai_service
-from services.rule_service import rule_service
-from services.compliance_service import compliance_service
-from services.risk_service import risk_service
-from services.evidence_service import evidence_service
-from services.drift_service import drift_service
-from services.report_service import report_service
+from services.ai_service import AIService
+from services.compliance_service import ComplianceService
+from services.rule_service import RuleEngineService, rule_service
+RuleService = RuleEngineService
+from services.report_service import ReportService
+from services.risk_service import RiskService
+from services.drift_service import DriftService
+from services.evidence_service import EvidenceService
+from services.responsibility_service import ResponsibilityEngine
+from services.case_service import CaseService
+from services.notification_service import NotificationService
+from services.email_service import EmailService
 
 __all__ = [
-    "ai_service",
+    "AIService",
+    "ComplianceService",
+    "RuleEngineService",
     "rule_service",
-    "compliance_service",
-    "risk_service",
-    "evidence_service",
-    "drift_service",
-    "report_service"
+    "RuleService",
+    "ReportService",
+    "RiskService",
+    "DriftService",
+    "EvidenceService",
+    "ResponsibilityEngine",
+    "CaseService",
+    "NotificationService",
+    "EmailService"
 ]

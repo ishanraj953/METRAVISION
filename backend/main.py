@@ -21,7 +21,11 @@ from api import (
     risk_router,
     listings_router,
     reports_router,
-    admin_router
+    admin_router,
+    stats_router,
+    cases_router,
+    responsible_parties_router,
+    notifications_router
 )
 
 # Initialize Database tables
@@ -29,8 +33,8 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    description="METRA-X Central Orchestrator Backend API — Legal Metrology Compliance System",
-    version="1.0.0",
+    description="METRAVISION Central Legal Metrology Compliance & Enforcement Platform",
+    version="2.0.0",
     docs_url="/docs",
     redoc_url="/redoc"
 )
@@ -38,7 +42,15 @@ app = FastAPI(
 # CORS Configuration for Frontend Compatibility
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000"
+    ],
+    allow_origin_regex=r"https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -60,13 +72,18 @@ app.include_router(risk_router)
 app.include_router(listings_router)
 app.include_router(reports_router)
 app.include_router(admin_router)
+app.include_router(stats_router)
+app.include_router(cases_router)
+app.include_router(responsible_parties_router)
+app.include_router(notifications_router)
 
 @app.get("/")
 def root():
     return {
-        "message": "Welcome to METRA-X Backend Service",
+        "message": "Welcome to METRAVISION Legal Metrology Compliance Platform",
         "docs": "/docs",
-        "status": "ONLINE"
+        "status": "ONLINE",
+        "version": "2.0.0"
     }
 
 if __name__ == "__main__":

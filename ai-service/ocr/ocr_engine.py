@@ -1,19 +1,56 @@
+import os
+import sys
+import logging
 from pathlib import Path
 from typing import List
-
-from paddleocr import PaddleOCR
+from PIL import Image
 
 from .ocr_result import OCRResult
+
+logger = logging.getLogger("metravision.ocr")
+
+try:
+    import winocr
+    HAS_WINOCR = True
+except Exception:
+    HAS_WINOCR = False
+
+try:
+    # Ensure paddle models don't crash with PIR / onednn bug
+    import paddlex.inference.models.runners.paddle_static.config.pp_option as pp_option
+    if hasattr(pp_option, 'MKLDNN_BLOCKLIST'):
+        if 'PP-OCRv6_medium_det' not in pp_option.MKLDNN_BLOCKLIST:
+            pp_option.MKLDNN_BLOCKLIST.append('PP-OCRv6_medium_det')
+        if 'PP-OCRv6_medium_rec' not in pp_option.MKLDNN_BLOCKLIST:
+            pp_option.MKLDNN_BLOCKLIST.append('PP-OCRv6_medium_rec')
+    from paddleocr import PaddleOCR
+    HAS_PADDLEOCR = True
+except Exception:
+    HAS_PADDLEOCR = False
 
 
 class OCREngine:
 
     def __init__(self, lang: str = "en", device: str = "cpu"):
-        self.ocr = PaddleOCR(
-            lang=lang,
-            device=device,
-            enable_mkldnn=False,
-        )
+        self.lang = lang
+        self.device = device
+        self._paddle_ocr = None
+
+    def _get_paddle_ocr(self):
+        if self._paddle_ocr is None and HAS_PADDLEOCR:
+            try:
+                self._paddle_ocr = PaddleOCR(
+                    lang=self.lang,
+                    device=self.device,
+                    use_doc_orientation_classify=False,
+                    use_doc_unwarping=False,
+                    use_textline_orientation=False,
+                    text_det_limit_side_len=640,
+                    text_recognition_batch_size=16,
+                )
+            except Exception as e:
+                logger.warning(f"Could not initialize PaddleOCR: {e}")
+        return self._paddle_ocr
 
     def extract_text(self, image_path: str, page: int = 1) -> List[OCRResult]:
 
@@ -27,12 +64,47 @@ class OCREngine:
         str_path = str(image)
         ocr_results: List[OCRResult] = []
 
-        try:
-            # First try predict method (PaddleOCR 3.x)
-            results = self.ocr.predict(str_path)
-        except Exception:
-            # Fallback to standard ocr method
-            results = self.ocr.ocr(str_path)
+        # 1. Primary Engine: Isolated Native Windows Media OCR (Process-safe, COM-isolated, 0.7s runtime)
+        runner_path = Path(__file__).parent / "native_ocr_runner.py"
+        if runner_path.exists():
+            try:
+                import subprocess
+                import json
+                cmd = [sys.executable, str(runner_path), str_path, self.lang]
+                proc = subprocess.run(cmd, capture_output=True, text=True, timeout=8)
+                if proc.returncode == 0 and proc.stdout.strip():
+                    items = json.loads(proc.stdout)
+                    for item in items:
+                        bbox = item.get("bbox", [0, 0, 0, 0])
+                        polygon = [[bbox[0], bbox[1]], [bbox[2], bbox[1]], [bbox[2], bbox[3]], [bbox[0], bbox[3]]]
+                        ocr_results.append(
+                            OCRResult(
+                                text=str(item.get("text", "")).strip(),
+                                confidence=float(item.get("confidence", 0.95)),
+                                bbox=bbox,
+                                polygon=polygon,
+                                source="winocr_isolated",
+                                page=page,
+                                image_path=str_path
+                            )
+                        )
+                    if ocr_results:
+                        return ocr_results
+            except Exception as e:
+                logger.warning(f"Native Windows OCR runner error: {e}, falling back to PaddleOCR")
+
+        # 2. Secondary Engine: PaddleOCR (Deep learning fallback)
+        paddle_instance = self._get_paddle_ocr()
+        if paddle_instance is not None:
+            try:
+                results = list(paddle_instance.predict(str_path))
+            except Exception:
+                try:
+                    results = paddle_instance.ocr(str_path)
+                except Exception:
+                    results = []
+        else:
+            results = []
 
         for result in results:
             if isinstance(result, dict):

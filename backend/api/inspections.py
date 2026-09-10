@@ -16,12 +16,16 @@ router = APIRouter(prefix="/inspections", tags=["Inspections"])
 @router.get("/", response_model=List[InspectionResponse])
 def get_inspections(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role([UserRole.CHECKER, UserRole.ADMIN]))
+    current_user: User = Depends(get_current_user)
 ):
     if current_user.role == UserRole.CHECKER:
         return db.query(Inspection).filter(
-            (Inspection.checker_id == current_user.id) | (Inspection.checker_id == None)
+            (Inspection.checker_id == current_user.id) | (Inspection.checker_id.is_(None))
         ).all()
+    elif current_user.role == UserRole.ADMIN:
+        return db.query(Inspection).all()
+    elif current_user.role == UserRole.SHOPKEEPER:
+        return db.query(Inspection).join(Product).filter(Product.shopkeeper_id == current_user.id).all()
     return db.query(Inspection).all()
 
 @router.get("/priority", response_model=List[InspectionResponse])

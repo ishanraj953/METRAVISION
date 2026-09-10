@@ -2,111 +2,395 @@
   {
     "rule_id": "LM-PC-001",
     "field": "mrp",
-    "category": ["GENERAL"],
-    "requirement": "MRP declaration required",
+    "category": [
+      "GENERAL"
+    ],
+    "requirement": "Maximum Retail Price (MRP) declaration in INR inclusive of all taxes",
+    "rule_reference": "Rule 6(1)(e) read with Rule 18 of PCR 2011",
+    "act_section": "Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 (1st offence) up to ₹1,00,000 (Jan Vishwas Act, 2023)",
     "severity": "HIGH",
-    "effective_from": "2022-04-01",
-    "version": "1.0",
+    "effective_from": "2011-04-01",
+    "version": "2.0",
     "status": "ACTIVE",
-    "source": "Legal Metrology (Packaged Commodities) Rules"
+    "source": "Legal Metrology (Packaged Commodities) Rules, 2011"
   },
   {
     "rule_id": "LM-PC-002",
     "field": "manufacturer_name",
-    "category": ["GENERAL"],
-    "requirement": "Manufacturer name required",
+    "category": [
+      "GENERAL"
+    ],
+    "requirement": "Name and complete physical address of the manufacturer or packer",
+    "rule_reference": "Rule 6(1)(a) PCR 2011",
+    "act_section": "Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 (1st offence) up to ₹1,00,000 (Jan Vishwas Act, 2023)",
     "severity": "HIGH",
-    "effective_from": "2022-04-01",
-    "version": "1.0",
+    "effective_from": "2011-04-01",
+    "version": "2.0",
     "status": "ACTIVE",
-    "source": "Legal Metrology (Packaged Commodities) Rules"
+    "source": "Legal Metrology (Packaged Commodities) Rules, 2011"
   },
   {
     "rule_id": "LM-PC-003",
     "field": "net_quantity",
-    "category": ["GENERAL"],
-    "requirement": "Net quantity declaration required",
+    "category": [
+      "GENERAL"
+    ],
+    "requirement": "Net quantity declaration in standard SI units (g, kg, ml, l, m, cm, number)",
+    "rule_reference": "Rule 6(1)(c) read with Third Schedule PCR 2011",
+    "act_section": "Section 36(1) & Section 36(2) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 to ₹50,000 (Section 36(2) for short quantity)",
     "severity": "HIGH",
-    "effective_from": "2022-04-01",
-    "version": "1.0",
+    "effective_from": "2011-04-01",
+    "version": "2.0",
     "status": "ACTIVE",
-    "source": "Legal Metrology (Packaged Commodities) Rules"
+    "source": "Legal Metrology (Packaged Commodities) Rules, 2011"
   },
   {
     "rule_id": "LM-PC-004",
     "field": "consumer_care",
-    "category": ["GENERAL"],
-    "requirement": "Consumer care details required",
+    "category": [
+      "GENERAL"
+    ],
+    "requirement": "Consumer care details including contact person name, telephone/helpline, and email address",
+    "rule_reference": "Rule 6(1)(h) PCR 2011",
+    "act_section": "Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 (1st offence) (Jan Vishwas Act, 2023)",
     "severity": "MEDIUM",
-    "effective_from": "2022-04-01",
-    "version": "1.0",
+    "effective_from": "2011-04-01",
+    "version": "2.0",
     "status": "ACTIVE",
-    "source": "Legal Metrology (Packaged Commodities) Rules"
+    "source": "Legal Metrology (Packaged Commodities) Rules, 2011"
   },
   {
-  "rule_id": "LM-PC-005",
-  "field": "manufacturing_packing_date",
-  "category": ["GENERAL"],
-  "requirement": "Manufacturing/Packing date required",
-  "severity": "HIGH",
-  "effective_from": "2022-04-01",
-  "version": "1.0",
-  "status": "ACTIVE",
-  "source": "Legal Metrology (Packaged Commodities) Rules"
- },
- {
-  "rule_id": "LM-PC-006",
-  "field": "country_of_origin",
-  "category": ["IMPORTED"],
-  "requirement": "Country of origin declaration required",
-  "severity": "HIGH",
-  "effective_from": "2022-04-01",
-  "version": "1.0",
-  "status": "ACTIVE",
-  "source": "Legal Metrology (Packaged Commodities) Rules"
- },
- {
-  "rule_id": "LM-PC-007",
-  "field": "importer_name",
-  "category": ["IMPORTED"],
-  "requirement": "Importer name declaration required",
-  "severity": "HIGH",
-  "effective_from": "2022-04-01",
-  "version": "1.0",
-  "status": "ACTIVE",
-  "source": "Legal Metrology (Packaged Commodities) Rules"
-},
-{
-  "rule_id": "LM-PC-008",
-  "field": "importer_address",
-  "category": ["IMPORTED"],
-  "requirement": "Importer address declaration required",
-  "severity": "HIGH",
-  "effective_from": "2022-04-01",
-  "version": "1.0",
-  "status": "ACTIVE",
-  "source": "Legal Metrology (Packaged Commodities) Rules"
-},
-{
-  "rule_id": "LM-PC-009",
-  "field": "unit_sale_price",
-  "category": ["E_COMMERCE"],
-  "requirement": "Unit sale price declaration required",
-  "severity": "MEDIUM",
-  "effective_from": "2022-04-01",
-  "version": "1.0",
-  "status": "ACTIVE",
-  "source": "Legal Metrology (Packaged Commodities) Rules"
-},
-{
-  "rule_id": "LM-PC-010",
-  "field": "batch_number",
-  "category": ["GENERAL"],
-  "requirement": "Batch/Lot number declaration required",
-  "severity": "MEDIUM",
-  "effective_from": "2022-04-01",
-  "version": "1.0",
-  "status": "ACTIVE",
-  "source": "Legal Metrology (Packaged Commodities) Rules"
-}
+    "rule_id": "LM-PC-005",
+    "field": "manufacturing_packing_date",
+    "category": [
+      "GENERAL"
+    ],
+    "requirement": "Month and year of manufacture or packing in MM/YYYY or Month/Year format",
+    "rule_reference": "Rule 6(1)(d) PCR 2011",
+    "act_section": "Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 (1st offence) up to ₹1,00,000",
+    "severity": "HIGH",
+    "effective_from": "2011-04-01",
+    "version": "2.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules, 2011"
+  },
+  {
+    "rule_id": "LM-PC-006",
+    "field": "country_of_origin",
+    "category": [
+      "IMPORTED",
+      "E_COMMERCE"
+    ],
+    "requirement": "Country of origin declaration for imported pre-packaged commodities and e-commerce display",
+    "rule_reference": "Rule 6(1)(n) PCR 2011 & 2026 COO Filter Notification",
+    "act_section": "Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 (1st offence) up to ₹50,000 (2nd offence)",
+    "severity": "HIGH",
+    "effective_from": "2017-06-23",
+    "version": "2.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Amendment Rules"
+  },
+  {
+    "rule_id": "LM-PC-007",
+    "field": "importer_name",
+    "category": [
+      "IMPORTED"
+    ],
+    "requirement": "Name and complete address of the importer in India",
+    "rule_reference": "Rule 6(1)(a) read with Rule 27 PCR 2011",
+    "act_section": "Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 to ₹1,00,000",
+    "severity": "HIGH",
+    "effective_from": "2011-04-01",
+    "version": "2.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules, 2011"
+  },
+  {
+    "rule_id": "LM-PC-008",
+    "field": "importer_address",
+    "category": [
+      "IMPORTED"
+    ],
+    "requirement": "Complete address of importer's premises with pin code",
+    "rule_reference": "Rule 6(1)(a) PCR 2011",
+    "act_section": "Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 to ₹50,000",
+    "severity": "HIGH",
+    "effective_from": "2011-04-01",
+    "version": "2.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules, 2011"
+  },
+  {
+    "rule_id": "LM-PC-009",
+    "field": "unit_sale_price",
+    "category": [
+      "GENERAL",
+      "E_COMMERCE"
+    ],
+    "requirement": "Unit Sale Price (USP) per g/ml (for qty < 1kg/1L) or per kg/l (for qty > 1kg/1L) rounded off to 2 decimal places",
+    "rule_reference": "Rule 6(1)(e) second proviso (PCR Amendment Rules, 2021/2022)",
+    "act_section": "Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 to ₹50,000",
+    "severity": "HIGH",
+    "effective_from": "2022-12-01",
+    "version": "2.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Amendment Rules, 2021/2022"
+  },
+  {
+    "rule_id": "LM-PC-010",
+    "field": "batch_number",
+    "category": [
+      "GENERAL"
+    ],
+    "requirement": "Batch number, lot number or identification code for manufacturing traceability",
+    "rule_reference": "Rule 6(1)(f) PCR 2011",
+    "act_section": "Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 (1st offence)",
+    "severity": "MEDIUM",
+    "effective_from": "2011-04-01",
+    "version": "2.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules, 2011"
+  },
+  {
+    "rule_id": "LM-PC-011",
+    "field": "product_name",
+    "category": [
+      "GENERAL"
+    ],
+    "requirement": "Generic or common name of the commodity on Principal Display Panel",
+    "rule_reference": "Rule 6(1)(b) PCR 2011",
+    "act_section": "Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 to ₹50,000",
+    "severity": "HIGH",
+    "effective_from": "2011-04-01",
+    "version": "2.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules, 2011"
+  },
+  {
+    "rule_id": "LM-PC-012",
+    "field": "expiry_date",
+    "category": [
+      "FOOD",
+      "COSMETICS"
+    ],
+    "requirement": "Best before or expiry date declaration for commodities which may become unfit for human consumption",
+    "rule_reference": "Rule 6(1)(g) PCR 2011",
+    "act_section": "Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 to ₹1,00,000",
+    "severity": "HIGH",
+    "effective_from": "2011-04-01",
+    "version": "2.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules, 2011"
+  },
+  {
+    "rule_id": "LM-PC-013",
+    "field": "ecom_digital_display",
+    "category": [
+      "E_COMMERCE"
+    ],
+    "requirement": "Digital Principal Display Panel containing all mandatory declarations prior to purchase",
+    "rule_reference": "Rule 6(10) PCR 2011 (E-Commerce Mandate)",
+    "act_section": "Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 (1st offence) up to ₹50,000 (2nd offence)",
+    "severity": "HIGH",
+    "effective_from": "2018-01-01",
+    "version": "2.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Amendment Rules, 2017"
+  },
+  {
+    "rule_id": "LM-PC-014",
+    "field": "numeral_height",
+    "category": [
+      "GENERAL"
+    ],
+    "requirement": "Minimum numeral and letter height on Principal Display Panel as per packaging area (Table I & II Schedule IV)",
+    "rule_reference": "Rule 9 read with Schedule IV of PCR 2011",
+    "act_section": "Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 to ₹50,000",
+    "severity": "MEDIUM",
+    "effective_from": "2011-04-01",
+    "version": "2.0",
+    "status": "ACTIVE",
+    "source": "Schedule IV, Legal Metrology (Packaged Commodities) Rules, 2011"
+  },
+  {
+    "rule_id": "LM-PC-015",
+    "field": "anti_profiteering_mrp",
+    "category": [
+      "GENERAL",
+      "RETAIL"
+    ],
+    "requirement": "Prohibition against charging or selling pre-packaged commodity at price higher than Maximum Retail Price",
+    "rule_reference": "Rule 18(1) & Rule 18(2) PCR 2011",
+    "act_section": "Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 (1st offence), ₹50,000 (2nd offence), ₹1,00,000 (subsequent)",
+    "severity": "CRITICAL",
+    "effective_from": "2011-04-01",
+    "version": "2.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules, 2011"
+  },
+  {
+    "rule_id": "LM-PC-016",
+    "field": "importer_registration",
+    "category": [
+      "IMPORTED"
+    ],
+    "requirement": "Mandatory registration of importer or packer under Rule 27 with Director or Controller of Legal Metrology",
+    "rule_reference": "Rule 27 PCR 2011",
+    "act_section": "Section 36(1) & Section 48 Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 (1st offence)",
+    "severity": "HIGH",
+    "effective_from": "2011-04-01",
+    "version": "2.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules, 2011"
+  },
+  {
+    "rule_id": "LM-PC-017",
+    "field": "edible_oil_sop",
+    "category": [
+      "FOOD",
+      "EDIBLE_OIL"
+    ],
+    "requirement": "Edible oils & fats net quantity declaration in standard units at reference temperature 30°C",
+    "rule_reference": "Ministry SoP for Net Quantity of Edible Oils dated 29.12.2023",
+    "act_section": "Section 18 & Section 36(2) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 to ₹50,000",
+    "severity": "HIGH",
+    "effective_from": "2023-12-29",
+    "version": "2.0",
+    "status": "ACTIVE",
+    "source": "Ministry of Consumer Affairs SoP dated 29.12.2023"
+  },
+  {
+    "rule_id": "LM-PC-018",
+    "field": "standard_pack_size",
+    "category": [
+      "FOOD",
+      "GENERAL"
+    ],
+    "requirement": "Packaged commodities specified in Second Schedule to be packed only in standardized quantities",
+    "rule_reference": "Rule 5 read with Second Schedule PCR 2011",
+    "act_section": "Section 18 & Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 to ₹50,000",
+    "severity": "MEDIUM",
+    "effective_from": "2011-04-01",
+    "version": "2.0",
+    "status": "ACTIVE",
+    "source": "Second Schedule, PCR 2011"
+  },
+  {
+    "rule_id": "LM-PC-019",
+    "field": "qr_code_compliance",
+    "category": [
+      "GENERAL",
+      "ELECTRONICS"
+    ],
+    "requirement": "QR Code may provide auxiliary details but mandatory declarations must be physically printed on PDP",
+    "rule_reference": "Legal Metrology (Packaged Commodities) (Amendment) Rules, 2023 dated 23.06.2023",
+    "act_section": "Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 to ₹50,000",
+    "severity": "MEDIUM",
+    "effective_from": "2023-06-23",
+    "version": "2.0",
+    "status": "ACTIVE",
+    "source": "Ministry Notification dated 23.06.2023"
+  },
+  {
+    "rule_id": "LM-PC-020",
+    "field": "visual_prominence",
+    "category": [
+      "GENERAL"
+    ],
+    "requirement": "All statutory declarations shall be conspicuous, legible, prominent and in distinct contrast with background",
+    "rule_reference": "Rule 9(1)(a) PCR 2011",
+    "act_section": "Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 (1st offence)",
+    "severity": "MEDIUM",
+    "effective_from": "2011-04-01",
+    "version": "2.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules, 2011"
+  },
+  {
+    "rule_id": "LM-PC-021",
+    "field": "ecom_coo_filter",
+    "category": [
+      "E_COMMERCE"
+    ],
+    "requirement": "Mandatory Country of Origin search filter and clear pre-checkout display on e-commerce platforms",
+    "rule_reference": "PCR (Amendment) Rules, 2026 Notification dated 13.02.2026",
+    "act_section": "Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 to ₹50,000",
+    "severity": "HIGH",
+    "effective_from": "2026-02-13",
+    "version": "2.0",
+    "status": "ACTIVE",
+    "source": "Ministry Notification dated 13.02.2026"
+  },
+  {
+    "rule_id": "LM-PC-022",
+    "field": "dual_mrp_prohibition",
+    "category": [
+      "GENERAL",
+      "RETAIL"
+    ],
+    "requirement": "Prohibition against dual MRP, smudging, or applying secondary stickers concealing original printed price",
+    "rule_reference": "Rule 18(2) PCR 2011",
+    "act_section": "Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 to ₹1,00,000",
+    "severity": "CRITICAL",
+    "effective_from": "2011-04-01",
+    "version": "2.0",
+    "status": "ACTIVE",
+    "source": "Legal Metrology (Packaged Commodities) Rules, 2011"
+  },
+  {
+    "rule_id": "LM-PC-023",
+    "field": "farm_produce_packaging",
+    "category": [
+      "FOOD",
+      "AGRICULTURE"
+    ],
+    "requirement": "Packages of agricultural produce up to 50 kg must comply with standard net quantity & declarations",
+    "rule_reference": "Ministry Advisory on Packages of Agriculture Farm Produce dated 06.03.2023",
+    "act_section": "Section 18 & Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 to ₹50,000",
+    "severity": "MEDIUM",
+    "effective_from": "2023-03-06",
+    "version": "2.0",
+    "status": "ACTIVE",
+    "source": "Ministry Advisory dated 06.03.2023"
+  },
+  {
+    "rule_id": "LM-PC-024",
+    "field": "medical_device_declaration",
+    "category": [
+      "MEDICAL_DEVICES",
+      "HEALTHCARE"
+    ],
+    "requirement": "Medical devices packages must declare revised MRP, Net Qty, and statutory details as notified",
+    "rule_reference": "Provisions of PCR 2011 on Medical Devices dated 10.07.2023",
+    "act_section": "Section 36(1) Legal Metrology Act, 2009",
+    "penalty_range": "₹25,000 to ₹1,00,000",
+    "severity": "HIGH",
+    "effective_from": "2023-07-10",
+    "version": "2.0",
+    "status": "ACTIVE",
+    "source": "Ministry Order dated 10.07.2023"
+  }
 ]

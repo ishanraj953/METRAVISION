@@ -10,6 +10,10 @@ from models.inspection import Inspection, OfficerDecision
 from models.risk import RiskScore
 from models.listing import OnlineListing, ProductVersion, Report
 from models.audit import AuditLog
+from models.responsible_party import ResponsibleParty, EntityType
+from models.violation_rule import ViolationRule
+from models.case import Case
+from models.notification import Notification
 
 __all__ = [
     "Base",
@@ -30,5 +34,10 @@ __all__ = [
     "OnlineListing",
     "ProductVersion",
     "Report",
-    "AuditLog"
+    "AuditLog",
+    "ResponsibleParty",
+    "EntityType",
+    "ViolationRule",
+    "Case",
+    "Notification"
 ]

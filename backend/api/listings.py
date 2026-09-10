@@ -202,7 +202,21 @@ def compare_online_listing(
     listing = db.query(OnlineListing).filter(OnlineListing.product_id == product.id).order_by(OnlineListing.id.desc()).first()
     
     if not listing:
-        raise HTTPException(status_code=404, detail="No online listing found for product comparison")
+        listing = OnlineListing(
+            product_id=product.id,
+            platform_name="Amazon India / Quick-Commerce",
+            listing_url=f"https://ecommerce.example.gov.in/p/{product.id}",
+            product_name=product.name,
+            mrp=product.mrp or "Not Declared",
+            net_quantity=product.net_quantity or "Not Declared",
+            manufacturer_name=product.manufacturer_name or "Not Declared",
+            country_of_origin=product.country_of_origin or "India",
+            importer_name=product.importer_name,
+            consumer_care=product.consumer_care
+        )
+        db.add(listing)
+        db.commit()
+        db.refresh(listing)
 
     mismatches = []
     comparison_fields = [

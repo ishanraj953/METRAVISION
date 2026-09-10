@@ -6,6 +6,8 @@ class Settings(BaseSettings):
     API_V1_STR: str = ""
     
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./metrax.db")
+    MONGODB_URL: str = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
+    MONGODB_DB_NAME: str = os.getenv("MONGODB_DB_NAME", "metravision")
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "postgres")
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "metrax_db")

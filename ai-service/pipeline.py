@@ -65,9 +65,14 @@ class METRAVisionPipeline:
         # PHASE 3 — OCR ENGINE
         # =====================================================
 
+        # Run OCR on the original high-resolution image first for maximum fidelity
         ocr_results = self.ocr_engine.extract_text(
-            target_image_path
+            image_path
         )
+        if not ocr_results and target_image_path != image_path:
+            ocr_results = self.ocr_engine.extract_text(
+                target_image_path
+            )
 
         # =====================================================
         # PHASE 4 — OCR POST-PROCESSING & NORMALIZATION
@@ -103,7 +108,7 @@ class METRAVisionPipeline:
 
             try:
                 annotated_image_path = draw_ocr_results(
-                    image_path=target_image_path,
+                    image_path=image_path,
                     results=ocr_results,
                     output_path=visualization_output_path,
                     declarations=declarations

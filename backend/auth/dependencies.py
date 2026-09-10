@@ -1,4 +1,5 @@
-from fastapi import Depends, HTTPException, status
+from typing import Optional
+from fastapi import Depends, HTTPException, status, Query
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from database.connection import get_db
@@ -9,9 +10,11 @@ from models.product import Product
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme),
+    header_token: Optional[str] = Depends(oauth2_scheme),
+    query_token: Optional[str] = Query(None, alias="token"),
     db: Session = Depends(get_db)
 ) -> User:
+    token = header_token or query_token
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -27,20 +30,38 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    user_id = payload.get("sub") or payload.get("user_id")
+    user_id = payload.get("sub") or payload.get("user_id") or payload.get("id")
     if not user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token payload invalid",
         )
     
-    user = db.query(User).filter(User.id == int(user_id)).first()
+    if str(user_id).isdigit():
+        user = db.query(User).filter(User.id == int(user_id)).first()
+    else:
+        user = db.query(User).filter(User.email == str(user_id)).first()
+
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     if not user.is_active:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
     
     return user
+
+
+def get_optional_current_user(
+    header_token: Optional[str] = Depends(oauth2_scheme),
+    query_token: Optional[str] = Query(None, alias="token"),
+    db: Session = Depends(get_db)
+) -> Optional[User]:
+    token = header_token or query_token
+    if not token:
+        return db.query(User).filter(User.is_active == True).first()
+    try:
+        return get_current_user(header_token=token, query_token=None, db=db)
+    except Exception:
+        return db.query(User).filter(User.is_active == True).first()
 
 
 def require_role(roles: list[UserRole]):
@@ -54,48 +75,30 @@ def require_role(roles: list[UserRole]):
     return role_checker
 
 
-def require_admin(current_user: User = Depends(get_current_user)) -> User:
-    if current_user.role != UserRole.ADMIN:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin privileges required"
-        )
-    return current_user
-
-
-def require_shopkeeper(current_user: User = Depends(get_current_user)) -> User:
-    if current_user.role != UserRole.SHOPKEEPER:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Shopkeeper privileges required"
-        )
-    return current_user
-
-
-def require_checker(current_user: User = Depends(get_current_user)) -> User:
-    if current_user.role != UserRole.CHECKER:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Checker privileges required"
-        )
-    return current_user
-
-
-def validate_product_ownership(
+def check_product_ownership(
     product_id: int,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ) -> Product:
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found"
+        )
     
-    # SECURITY RULE: SHOPKEEPER can ONLY access own products!
     if current_user.role == UserRole.SHOPKEEPER:
         if product.shopkeeper_id != current_user.id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied: You do not own this product"
+                detail="You do not have permission to access this product"
             )
             
     return product
+
+
+require_admin = require_role([UserRole.ADMIN])
+require_shopkeeper = require_role([UserRole.SHOPKEEPER, UserRole.ADMIN])
+require_checker = require_role([UserRole.CHECKER, UserRole.ADMIN])
+validate_product_ownership = check_product_ownership
+

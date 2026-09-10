@@ -1,0 +1,32 @@
+{
+  "name": "metravision-frontend",
+  "version": "1.0.0",
+  "description": "METRAVISION - Legal Metrology Enforcement Intelligence System",
+  "main": "src/index.jsx",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "legal-metrology",
+    "ocr",
+    "compliance",
+    "intelligence"
+  ],
+  "author": "METRAVISION Team",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "axios": "^1.8.2",
+    "framer-motion": "^13.2.0",
+    "lucide-react": "^1.16.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.7.0",
+    "vite": "^5.4.21"
+  }
+}

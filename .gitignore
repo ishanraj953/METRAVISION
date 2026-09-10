@@ -1,31 +1,62 @@
-# Python virtual environment
+# Node & Frontend Build
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Python Virtual Environments
 venv/
 .venv/
 env/
+ENV/
+ai-service/venv/
+backend/venv/
 
-# Python cache
+# Python Cache & Compiled Files
 __pycache__/
 *.py[cod]
 *$py.class
-
-# IDE
-.vscode/
-.idea/
-
-# Environment variables
-.env
-.env.*
-
-# Testing / coverage
+*.so
 .pytest_cache/
 .coverage
 htmlcov/
+.nox/
+.hypothesis/
 
-# Generated files
+# Local SQLite Databases
+*.db
+*.sqlite
+*.sqlite3
+metrax.db
+test_metrax.db
+test_metrax_enf.db
+backend/metrax.db
+backend/test_metrax.db
+
+# Storage, Uploads & Output Directories
+storage/
+backend/storage/
+backend/output/
+ai-service/output/
+ai-service/processed/
 processed/
 outputs/
 logs/
+*.log
 
-# OS files
+# IDE & Editor Config
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment Variables & Credentials
+.env
+.env.*
+!.env.example
+
+# OS & System Files
 .DS_Store
 Thumbs.db
+ehthumbs.db
+desktop.ini

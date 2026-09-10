@@ -6,6 +6,7 @@ class ReportCreate(BaseModel):
     report_type: str  # CHECKER, SHOPKEEPER, ADMIN
     format: str = "JSON"  # JSON, PDF
     product_id: Optional[int] = None
+    inspection_id: Optional[int] = None
 
 class ReportResponse(BaseModel):
     id: int

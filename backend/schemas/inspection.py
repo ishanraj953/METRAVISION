@@ -9,6 +9,10 @@ class InspectionCreate(BaseModel):
     priority_score: Optional[float] = 50.0
     remarks: Optional[str] = None
 
+class InspectionStatusUpdate(BaseModel):
+    status: str
+    remarks: Optional[str] = None
+
 class InspectionResponse(BaseModel):
     id: int
     inspection_code: str

@@ -1,8 +1,14 @@
 import os
+import sys
+from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+BACKEND_DIR = Path(__file__).resolve().parent.parent
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
 
 from main import app
 from database.connection import get_db
@@ -191,3 +197,105 @@ def test_reports_and_admin_analytics():
     assert client.get("/admin/violation-statistics", headers={"Authorization": f"Bearer {adm_token}"}).status_code == 200
     assert client.get("/admin/risk-statistics", headers={"Authorization": f"Bearer {adm_token}"}).status_code == 200
     assert client.get("/admin/audit-logs", headers={"Authorization": f"Bearer {adm_token}"}).status_code == 200
+
+
+# --- 7. INSTANT SCAN & PRESETS TESTS ---
+def test_instant_scan_and_presets():
+    chk_token = client.post("/auth/login", json={"email": "checker@metrax.gov.in", "password": "Checker123!"}).json()["access_token"]
+
+    # 1. Presets list
+    presets_resp = client.get("/scans/presets")
+    assert presets_resp.status_code == 200
+    assert isinstance(presets_resp.json(), list)
+
+    # 2. Instant Scan with fake image
+    fake_img = b"SAMPLE_PACKAGE_BYTES_FOR_DIRECT_INSTANT_SCAN"
+    files = {"file": ("direct_sample.jpg", fake_img, "image/jpeg")}
+    scan_resp = client.post(
+        "/scans/instant",
+        files=files,
+        data={"product_name": "Direct Test Commodity", "category": "food"},
+        headers={"Authorization": f"Bearer {chk_token}"}
+    )
+    assert scan_resp.status_code == 200
+    res = scan_resp.json()
+    assert "scan_id" in res
+    assert res["status"] in ["COMPLIANT", "NON_COMPLIANT", "INSUFFICIENT_EVIDENCE"]
+    assert "risk" in res
+    assert "declarations" in res
+
+
+# --- 8. AUTO-DETECT & STATUTORY PDF REPORTS ---
+def test_auto_detect_commodity():
+    shp_token = client.post("/auth/login", json={"email": "shopkeeper@metrax.com", "password": "Shop123!"}).json()["access_token"]
+    fake_img = b"MOCK_PACKAGING_IMAGE_FOR_AUTO_DETECT"
+    files = [("files", ("panel_front.jpg", fake_img, "image/jpeg"))]
+    resp = client.post("/products/auto-detect", headers={"Authorization": f"Bearer {shp_token}"}, files=files)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "is_new_commodity" in data
+    assert "detected_fields" in data
+    assert "missing_fields" in data
+
+def test_statutory_pdf_report_memo():
+    chk_token = client.post("/auth/login", json={"email": "checker@metrax.gov.in", "password": "Checker123!"}).json()["access_token"]
+    resp = client.post("/reports/", headers={"Authorization": f"Bearer {chk_token}"}, json={"report_type": "CHECKER", "format": "PDF"})
+    assert resp.status_code == 200
+    r_data = resp.json()
+    assert r_data["format"] == "PDF"
+    
+    # Download check
+    dl = client.get(f"/reports/{r_data['id']}/download", headers={"Authorization": f"Bearer {chk_token}"})
+    assert dl.status_code == 200
+    assert dl.headers["content-type"] == "application/pdf"
+
+
+
+# --- 11. ENFORCEMENT CASES & RESPONSIBILITY ENGINE TESTS ---
+def test_enforcement_cases_and_responsibility():
+    # Login as admin
+    login_res = client.post("/auth/login", json={"email": "admin@metrax.gov.in", "password": "Admin123!"})
+    assert login_res.status_code == 200
+    token = login_res.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Evaluate responsibility preview
+    eval_res = client.post(
+        "/cases/evaluate-responsibility",
+        headers=headers,
+        json={
+            "extracted_data": {
+                "manufacturer": "Pinnacle Consumer Products Pvt Ltd",
+                "mrp": "Rs. 250",
+                "net_quantity": "200g"
+            },
+            "violations": [
+                {"field": "mrp", "message": "MRP font height non-compliant"}
+            ]
+        }
+    )
+    assert eval_res.status_code == 200
+    eval_data = eval_res.json()
+    assert eval_data["entity_type"] == "MANUFACTURER"
+    assert eval_data["officer_confirmation_required"] is True
+
+    # Get Dashboard KPIs
+    kpi_res = client.get("/cases/dashboard/kpi", headers=headers)
+    assert kpi_res.status_code == 200
+    assert "total_cases" in kpi_res.json()
+
+    # List Cases
+    cases_res = client.get("/cases", headers=headers)
+    assert cases_res.status_code == 200
+
+    # List Responsible Parties
+    parties_res = client.get("/responsible-parties", headers=headers)
+    assert parties_res.status_code == 200
+
+    # Responsible Parties Stats
+    p_stats_res = client.get("/responsible-parties/stats", headers=headers)
+    assert p_stats_res.status_code == 200
+
+    # Notifications List
+    notifs_res = client.get("/notifications", headers=headers)
+    assert notifs_res.status_code == 200

@@ -55,8 +55,36 @@ def seed_database(db=None):
         db.refresh(shopkeeper)
         db.refresh(checker)
 
-        print("Seeding Compliance Rules...")
-        rules = [
+        print("Seeding Compliance Rules from rules.json...")
+        rules_path = os.path.join(os.path.dirname(__file__), "..", "rules", "rules.json")
+        rules = []
+        if os.path.exists(rules_path):
+            try:
+                with open(rules_path, "r", encoding="utf-8") as rf:
+                    raw_rules = json.load(rf)
+                    for r in raw_rules:
+                        cat = (r.get("category") or ["general"])[0].lower()
+                        rules.append(
+                            Rule(
+                                rule_code=r.get("rule_id"),
+                                category=cat,
+                                field_name=r.get("field"),
+                                rule_description=f"{r.get('requirement')} [{r.get('rule_reference', '')} / {r.get('act_section', '')}]",
+                                severity=r.get("severity", "HIGH"),
+                                parameters=json.dumps({
+                                    "rule_reference": r.get("rule_reference"),
+                                    "act_section": r.get("act_section"),
+                                    "penalty_range": r.get("penalty_range"),
+                                    "source": r.get("source"),
+                                    "effective_from": r.get("effective_from")
+                                })
+                            )
+                        )
+            except Exception as e:
+                print(f"Warning loading rules.json for seeding: {e}")
+
+        # Ensure legacy test rule codes also exist for backward compatibility
+        legacy_rules = [
             Rule(rule_code="LM-001", category="electronics", field_name="mrp", rule_description="MRP must be clearly declared in INR inclusive of all taxes.", severity="HIGH"),
             Rule(rule_code="LM-002", category="electronics", field_name="net_quantity", rule_description="Standard Net Quantity declaration required.", severity="HIGH"),
             Rule(rule_code="LM-003", category="electronics", field_name="country_of_origin", rule_description="Country of Origin mandatory for pre-packaged commodities.", severity="HIGH"),
@@ -64,6 +92,10 @@ def seed_database(db=None):
             Rule(rule_code="LM-005", category="electronics", field_name="importer_name", rule_description="Importer details mandatory for imported commodities.", severity="MEDIUM"),
             Rule(rule_code="LM-006", category="electronics", field_name="consumer_care", rule_description="Consumer care email address or helpline number required.", severity="HIGH")
         ]
+        for lr in legacy_rules:
+            if not any(r.rule_code == lr.rule_code for r in rules):
+                rules.append(lr)
+
         db.add_all(rules)
         db.commit()
 
@@ -114,30 +146,29 @@ def seed_database(db=None):
         db.refresh(p3)
 
         print("Seeding Product Versions & Drift...")
-        v1 = ProductVersion(product_id=p1.id, version_number=1, mrp="₹499", net_quantity="1 N", manufacturer_name="MetraTech Pvt Ltd")
-        v2 = ProductVersion(product_id=p1.id, version_number=2, mrp="₹599", net_quantity="1 N", manufacturer_name="MetraTech Pvt Ltd") # Drift detected!
-        db.add_all([v1, v2])
+        v1 = ProductVersion(product_id=p1.id, version_number=1, mrp="55.00", net_quantity="200 g", manufacturer_name="Haldiram Foods International Pvt Ltd")
+        db.add(v1)
 
         print("Seeding Online Listings (Cross-Channel)...")
         l1 = OnlineListing(
             product_id=p1.id,
-            platform_name="Flipazon Ecommerce",
-            listing_url="https://flipazon.com/p/metrasound-x10",
-            product_name="MetraSound Wireless Headphones X10",
-            mrp="₹599", # Mismatch with physical MRP ₹499!
-            net_quantity="1 N",
-            manufacturer_name="MetraTech Pvt Ltd",
+            platform_name="Amazon India",
+            listing_url="https://amazon.in/dp/B00N0N4FVO",
+            product_name=p1.name,
+            mrp=p1.mrp,
+            net_quantity=p1.net_quantity,
+            manufacturer_name=p1.manufacturer_name,
             country_of_origin="India"
         )
         l2 = OnlineListing(
             product_id=p2.id,
-            platform_name="QuickMart Online",
-            listing_url="https://quickmart.com/p/ultrasmart-20000",
-            product_name="UltraSmart Power Bank 20000mAh",
-            mrp="₹1499",
-            net_quantity="1 N",
-            manufacturer_name="Global Tech Corp",
-            country_of_origin="China"
+            platform_name="QuickMart India",
+            listing_url="https://quickmart.in/p/tata-salt-1kg",
+            product_name=p2.name,
+            mrp=p2.mrp,
+            net_quantity=p2.net_quantity,
+            manufacturer_name=p2.manufacturer_name,
+            country_of_origin="India"
         )
         db.add_all([l1, l2])
 
@@ -159,9 +190,35 @@ def seed_database(db=None):
             confidence=0.96,
             status="OPEN"
         )
-        db.add(v_item)
+        v_item2 = Violation(
+            violation_code="VIOL-SEED02",
+            product_id=p2.id,
+            scan_id=scan1.id,
+            rule_id=rules[0].id,
+            field="mrp",
+            expected_value="₹1499 incl. of all taxes",
+            observed_value="₹1699 (Oversold above MRP)",
+            severity="CRITICAL",
+            confidence=0.98,
+            status="OPEN"
+        )
+        v_item3 = Violation(
+            violation_code="VIOL-SEED03",
+            product_id=p3.id,
+            scan_id=scan1.id,
+            rule_id=rules[1].id,
+            field="net_quantity",
+            expected_value="1 N",
+            observed_value="MISSING",
+            severity="HIGH",
+            confidence=0.95,
+            status="OPEN"
+        )
+        db.add_all([v_item, v_item2, v_item3])
         db.commit()
         db.refresh(v_item)
+        db.refresh(v_item2)
+        db.refresh(v_item3)
 
         ev_item = Evidence(
             violation_id=v_item.id,
@@ -170,7 +227,14 @@ def seed_database(db=None):
             ocr_confidence=0.96,
             annotated_image="/storage/annotated/seed_sample.jpg"
         )
-        db.add(ev_item)
+        ev_item2 = Evidence(
+            violation_id=v_item2.id,
+            bbox="[150, 400, 350, 480]",
+            detected_text="₹1699",
+            ocr_confidence=0.98,
+            annotated_image="/storage/annotated/seed_sample.jpg"
+        )
+        db.add_all([ev_item, ev_item2])
 
         print("Seeding Risk Scores & Inspections...")
         risk = RiskScore(
