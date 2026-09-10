@@ -1,18 +1,27 @@
 import os
 from typing import Optional, Dict, Any, List
 from datetime import datetime
-from pymongo import MongoClient
-from pymongo.collection import Collection
-from pymongo.database import Database
+try:
+    from pymongo import MongoClient
+    from pymongo.collection import Collection
+    from pymongo.database import Database
+except ImportError:
+    MongoClient = None
+    Collection = Any
+    Database = Any
+
 from config import settings
 
-_client: Optional[MongoClient] = None
-_db: Optional[Database] = None
+_client: Optional[Any] = None
+_db: Optional[Any] = None
 
-def get_mongo_client() -> MongoClient:
+def get_mongo_client() -> Optional[Any]:
     global _client
-    if _client is None:
-        _client = MongoClient(settings.MONGODB_URL, serverSelectionTimeoutMS=3000)
+    if _client is None and MongoClient is not None:
+        try:
+            _client = MongoClient(settings.MONGODB_URL, serverSelectionTimeoutMS=3000)
+        except Exception:
+            _client = None
     return _client
 
 def get_mongo_db() -> Database:
