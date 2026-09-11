@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from config import settings
@@ -40,22 +40,43 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# CORS Configuration for Frontend Compatibility
-allowed_origins = [
-    "https://metravision-mu.vercel.app",
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:8000",
-    "https://metravision.onrender.com"
-]
+# Robust Custom CORS Middleware to handle origin, credentials, and preflight OPTIONS
+@app.middleware("http")
+async def custom_cors_middleware(request, call_next):
+    req_origin = request.headers.get("origin")
+    cors_origin = req_origin if req_origin else "*"
 
+    if request.method == "OPTIONS":
+        from fastapi.responses import Response
+        response = Response(status_code=204)
+        response.headers["Access-Control-Allow-Origin"] = cors_origin
+        if req_origin:
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        return response
+
+    try:
+        response = await call_next(request)
+    except Exception as exc:
+        from fastapi.responses import JSONResponse
+        response = JSONResponse(
+            status_code=500,
+            content={"detail": str(exc), "status": "ERROR"}
+        )
+
+    response.headers["Access-Control-Allow-Origin"] = cors_origin
+    if req_origin:
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    return response
+
+# Standard FastAPI CORSMiddleware fallback
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_origin_regex=r"https://.*\.vercel\.app",
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -64,7 +85,7 @@ app.add_middleware(
 os.makedirs(settings.STORAGE_DIR, exist_ok=True)
 app.mount("/storage", StaticFiles(directory=settings.STORAGE_DIR), name="storage")
 
-# Include Routers
+# Register Routers at Root Level (e.g. /cases, /notifications, /auth)
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(products_router)
@@ -81,6 +102,27 @@ app.include_router(cases_router)
 app.include_router(responsible_parties_router)
 app.include_router(notifications_router)
 app.include_router(intelligence_router)
+
+# Register Routers under /api/v1 Prefix as well (e.g. /api/v1/cases, /api/v1/auth)
+api_v1_router = APIRouter(prefix="/api/v1")
+api_v1_router.include_router(auth_router)
+api_v1_router.include_router(users_router)
+api_v1_router.include_router(products_router)
+api_v1_router.include_router(scans_router)
+api_v1_router.include_router(compliance_router)
+api_v1_router.include_router(violations_router)
+api_v1_router.include_router(inspections_router)
+api_v1_router.include_router(risk_router)
+api_v1_router.include_router(listings_router)
+api_v1_router.include_router(reports_router)
+api_v1_router.include_router(admin_router)
+api_v1_router.include_router(stats_router)
+api_v1_router.include_router(cases_router)
+api_v1_router.include_router(responsible_parties_router)
+api_v1_router.include_router(notifications_router)
+api_v1_router.include_router(intelligence_router)
+
+app.include_router(api_v1_router)
 
 @app.get("/")
 def root():

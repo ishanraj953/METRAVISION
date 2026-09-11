@@ -20,7 +20,7 @@ from schemas.case import (
     DashboardKPIResponse
 )
 from pydantic import BaseModel
-from auth.dependencies import get_current_user
+from auth.dependencies import get_current_user, get_optional_current_user
 from services.case_service import CaseService
 from services.responsibility_service import ResponsibilityEngine
 from services.email_service import EmailService
@@ -90,7 +90,7 @@ def get_dashboard_kpis(
     officer_id: Optional[str] = Query(None),
     my_cases_only: Optional[bool] = Query(None),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_optional_current_user)
 ):
     parsed_officer_id = int(officer_id) if officer_id and str(officer_id).isdigit() else None
     target_officer_id = parsed_officer_id
@@ -122,7 +122,7 @@ def list_cases(
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_optional_current_user)
 ):
     from sqlalchemy import or_
     query = db.query(Case)

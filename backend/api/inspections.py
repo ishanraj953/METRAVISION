@@ -8,23 +8,23 @@ from models.inspection import Inspection
 from models.product import Product
 from models.risk import RiskScore
 from schemas.inspection import InspectionCreate, InspectionResponse
-from auth.dependencies import get_current_user, require_role
+from auth.dependencies import get_current_user, get_optional_current_user, require_role
 from utils.audit_logger import log_audit
 
 router = APIRouter(prefix="/inspections", tags=["Inspections"])
 
-@router.get("/", response_model=List[InspectionResponse])
+@router.get("", response_model=List[InspectionResponse])
 def get_inspections(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_optional_current_user)
 ):
-    if current_user.role == UserRole.CHECKER:
+    if current_user and current_user.role == UserRole.CHECKER:
         return db.query(Inspection).filter(
             (Inspection.checker_id == current_user.id) | (Inspection.checker_id.is_(None))
         ).all()
-    elif current_user.role == UserRole.ADMIN:
+    elif current_user and current_user.role == UserRole.ADMIN:
         return db.query(Inspection).all()
-    elif current_user.role == UserRole.SHOPKEEPER:
+    elif current_user and current_user.role == UserRole.SHOPKEEPER:
         return db.query(Inspection).join(Product).filter(Product.shopkeeper_id == current_user.id).all()
     return db.query(Inspection).all()
 

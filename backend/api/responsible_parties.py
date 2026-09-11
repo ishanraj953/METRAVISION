@@ -12,14 +12,14 @@ from schemas.responsible_party import (
     ResponsiblePartyResponse,
     ResponsiblePartyListResponse
 )
-from auth.dependencies import get_current_user
+from auth.dependencies import get_current_user, get_optional_current_user
 
 router = APIRouter(prefix="/responsible-parties", tags=["Responsible Parties Directory"])
 
 @router.get("/stats")
 def get_party_statistics(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_optional_current_user)
 ):
     total = db.query(func.count(ResponsibleParty.id)).scalar() or 0
     active = db.query(func.count(ResponsibleParty.id)).filter(ResponsibleParty.status == "ACTIVE").scalar() or 0
@@ -48,7 +48,7 @@ def list_responsible_parties(
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_optional_current_user)
 ):
     query = db.query(ResponsibleParty)
 

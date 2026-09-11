@@ -9,7 +9,7 @@ from models.user import User
 from models.scan import Scan
 from schemas.scan import ScanOrchestrationResponse, ScanSummaryResponse
 from services.compliance_service import compliance_service
-from auth.dependencies import get_current_user, validate_product_ownership
+from auth.dependencies import get_current_user, get_optional_current_user, validate_product_ownership
 from utils.audit_logger import log_audit
 
 router = APIRouter(tags=["Scans"])
@@ -68,7 +68,7 @@ def multi_facet_scan_endpoint(
     product_name: Optional[str] = Form(None),
     category: Optional[str] = Form(None),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_optional_current_user)
 ):
     """
     Multi-Facet Package Scan: requires at least 4 photos (PDP Front, Back Panel, MRP Crimp, Manufacturer/Origin Panel).
@@ -123,7 +123,7 @@ def instant_scan_endpoint(
     product_name: Optional[str] = Form(None),
     category: Optional[str] = Form(None),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_optional_current_user)
 ):
     """
     Direct instant scan endpoint: scan ANY package photograph directly without requiring a pre-registered product.
@@ -133,10 +133,12 @@ def instant_scan_endpoint(
     if not contents:
         raise HTTPException(status_code=400, detail="Empty image file uploaded")
 
+    user_id = current_user.id if current_user and hasattr(current_user, 'id') else 1
+
     try:
         result = compliance_service.scan_direct(
             db=db,
-            user_id=current_user.id,
+            user_id=user_id,
             image_bytes=contents,
             filename=file.filename or "instant_package_scan.jpg",
             category_hint=category,

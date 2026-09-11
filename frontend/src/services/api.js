@@ -1,7 +1,7 @@
 import axios from "axios";
 
-let rawBaseUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "" : "http://127.0.0.1:8000");
-if (rawBaseUrl && rawBaseUrl.endsWith("/")) {
+let rawBaseUrl = import.meta.env.VITE_API_URL || "/api/v1";
+if (rawBaseUrl && rawBaseUrl.endsWith("/") && rawBaseUrl.length > 1) {
   rawBaseUrl = rawBaseUrl.slice(0, -1);
 }
 export const API_BASE_URL = rawBaseUrl;
