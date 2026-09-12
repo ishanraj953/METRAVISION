@@ -40,45 +40,34 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Robust Custom CORS Middleware to handle origin, credentials, and preflight OPTIONS
+# Catch-all exception handling middleware to ensure errors return valid JSON
 @app.middleware("http")
-async def custom_cors_middleware(request, call_next):
-    req_origin = request.headers.get("origin")
-    cors_origin = req_origin if req_origin else "*"
-
-    if request.method == "OPTIONS":
-        from fastapi.responses import Response
-        response = Response(status_code=204)
-        response.headers["Access-Control-Allow-Origin"] = cors_origin
-        if req_origin:
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
-        response.headers["Access-Control-Allow-Headers"] = "*"
-        return response
-
+async def catch_exceptions_middleware(request, call_next):
     try:
-        response = await call_next(request)
+        return await call_next(request)
     except Exception as exc:
         from fastapi.responses import JSONResponse
-        response = JSONResponse(
+        return JSONResponse(
             status_code=500,
             content={"detail": str(exc), "status": "ERROR"}
         )
 
-    response.headers["Access-Control-Allow-Origin"] = cors_origin
-    if req_origin:
-        response.headers["Access-Control-Allow-Credentials"] = "true"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
-    response.headers["Access-Control-Allow-Headers"] = "*"
-    return response
-
-# Standard FastAPI CORSMiddleware fallback
+# Registered last so it executes FIRST on incoming requests and LAST on outgoing responses
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=[
+        "https://metravision-mu.vercel.app",
+        "https://metravision.onrender.com",
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:3000"
+    ],
+    allow_origin_regex=r"https?://.*",
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Static file serving for storage images and generated reports

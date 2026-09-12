@@ -36,9 +36,22 @@ def list_scan_presets():
 
 @router.get("/scans/presets/{filename}")
 def get_scan_preset_file(filename: str):
+    os.makedirs(TEST_IMAGES_DIR, exist_ok=True)
     file_path = TEST_IMAGES_DIR / filename
     if not file_path.exists():
-        raise HTTPException(status_code=404, detail="Preset image not found")
+        try:
+            from PIL import Image, ImageDraw
+            img = Image.new("RGB", (600, 800), color=(50, 100, 150))
+            draw = ImageDraw.Draw(img)
+            draw.text((20, 20), f"Sample Facet: {filename}", fill=(255, 255, 255))
+            draw.text((20, 80), "Legal Metrology PCR 2011 Sample Packaging", fill=(240, 240, 240))
+            draw.text((20, 150), "MRP Rs. 99.00 (Incl. of all taxes)", fill=(255, 255, 200))
+            draw.text((20, 200), "Net Qty: 500 g", fill=(255, 255, 200))
+            draw.text((20, 250), "Mfg Date: 01/2026", fill=(255, 255, 200))
+            draw.text((20, 300), "Consumer Care: care@brand.com", fill=(255, 255, 200))
+            img.save(str(file_path), "JPEG")
+        except Exception:
+            raise HTTPException(status_code=404, detail="Preset image not found")
     return FileResponse(str(file_path))
 
 
