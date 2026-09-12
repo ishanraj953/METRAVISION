@@ -29,8 +29,13 @@ from api import (
     intelligence_router
 )
 
-# Initialize Database tables
+# Initialize Database tables & auto-seed default accounts on deployment startup
 Base.metadata.create_all(bind=engine)
+try:
+    from seed import seed_database
+    seed_database()
+except Exception as exc:
+    print(f"Startup seed notice: {exc}")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
